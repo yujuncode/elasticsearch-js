@@ -772,6 +772,7 @@ test('connection.toJSON should hide agent, ssl and auth', t => {
     resurrectTimeout: 0,
     _openRequests: 0,
     status: 'alive',
+    weight: 0,
     roles: {
       master: true,
       data: true,
