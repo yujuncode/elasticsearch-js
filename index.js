@@ -24,6 +24,7 @@ const debug = require('debug')('elasticsearch')
 const Transport = require('./lib/Transport')
 const Connection = require('./lib/Connection')
 const ConnectionPool = require('./lib/ConnectionPool')
+const WeightedConnectionPool = require('./lib/WeightedConnectionPool')
 const Serializer = require('./lib/Serializer')
 const errors = require('./lib/errors')
 const { ConfigurationError } = errors
@@ -220,6 +221,7 @@ module.exports = {
   Client,
   Transport,
   ConnectionPool,
+  WeightedConnectionPool,
   Connection,
   Serializer,
   events,
