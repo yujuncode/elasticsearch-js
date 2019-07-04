@@ -11,6 +11,34 @@ const options = {
   iterations: 1000
 }
 
+bench('ConnectionPool.getConnection - 3 connections', options, async b => {
+  const pool = new ConnectionPool({ Connection: connection.MockConnection })
+  for (var port = 9200; port < 9203; port++) {
+    pool.addConnection(`http://localhost:${port}`)
+  }
+  assert.strictEqual(pool.connections.size, 3)
+
+  b.start()
+  for (var i = 0; i < b.iterations; i++) {
+    pool.getConnection()
+  }
+  b.end()
+})
+
+bench('WeightedConnectionPool.getConnection - 3 connections', options, async b => {
+  const pool = new WeightedConnectionPool({ Connection: connection.MockConnection })
+  for (var port = 9200; port < 9203; port++) {
+    pool.addConnection(`http://localhost:${port}`)
+  }
+  assert.strictEqual(pool.size, 3)
+
+  b.start()
+  for (var i = 0; i < b.iterations; i++) {
+    pool.getConnection()
+  }
+  b.end()
+})
+
 bench('ConnectionPool.getConnection - 10 connections', options, async b => {
   const pool = new ConnectionPool({ Connection: connection.MockConnection })
   for (var port = 9200; port < 9210; port++) {
