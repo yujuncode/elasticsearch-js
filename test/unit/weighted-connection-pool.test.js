@@ -153,7 +153,7 @@ test('API', t => {
           'http://localhost:9202/'
         ])
 
-        pool.markDead({ id: 'http://localhost:9201/' })
+        pool.markDead(pool.connections[1])
 
         // with thid distribution we expect
         // to see the dead connection every 7 gets
@@ -185,8 +185,8 @@ test('API', t => {
           'http://localhost:9202/'
         ])
 
-        pool.markDead({ id: 'http://localhost:9201/' })
-        pool.markDead({ id: 'http://localhost:9201/' })
+        pool.markDead(pool.connections[1])
+        pool.markDead(pool.connections[1])
 
         // with thid distribution we expect
         // to see the dead connection every 4 times in 10 gets
@@ -284,7 +284,7 @@ test('API', t => {
       const href1 = 'http://localhost:9200/'
       const href2 = 'http://localhost:9200/other'
       pool.addConnection([href1, href2])
-      pool.markDead({ id: href1 })
+      pool.markDead(pool.connections[0])
 
       const filter = node => {
         t.strictEqual(node.id, href2)
