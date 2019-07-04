@@ -83,6 +83,7 @@ test('API', t => {
 
     pool.markDead(connection)
     t.strictEqual(connection.weight, 25)
+    t.strictEqual(connection.status, Connection.statuses.DEAD)
     t.strictEqual(pool.maxWeight, 50)
     t.strictEqual(pool.greatestCommonDivisor, 25)
     t.end()
@@ -99,6 +100,7 @@ test('API', t => {
     t.strictEqual(connection.weight, 50)
     t.strictEqual(pool.maxWeight, 50)
     t.strictEqual(pool.greatestCommonDivisor, 50)
+    t.strictEqual(connection.status, Connection.statuses.ALIVE)
 
     t.end()
   })
