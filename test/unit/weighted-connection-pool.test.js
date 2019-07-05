@@ -76,6 +76,22 @@ test('API', t => {
     t.end()
   })
 
+  t.test('update should change the connections array in an immutable fashion', t => {
+    const pool = new WeightedConnectionPool({ Connection })
+
+    t.strictEqual(pool.size, 0)
+
+    pool.update([
+      pool.urlToHost('http://localhost:9200'),
+      pool.urlToHost('http://localhost:9201'),
+      pool.urlToHost('http://localhost:9202')
+    ])
+
+    t.strictEqual(pool.size, 3)
+
+    t.end()
+  })
+
   t.test('markDead', t => {
     const pool = new WeightedConnectionPool({ Connection })
     var connection = pool.addConnection('http://localhost:9200/')
@@ -549,181 +565,174 @@ test('API', t => {
     t.end()
   })
 
-  // t.test('update', t => {
-  //   t.test('Should not update existing connections', t => {
-  //     t.plan(2)
-  //     class CustomWeightedConnectionPool extends WeightedConnectionPool {
-  //       markAlive () {
-  //         t.fail('Should not be called')
-  //       }
-  //     }
-  //     const pool = new CustomWeightedConnectionPool({ Connection })
-  //     pool.addConnection([{
-  //       url: new URL('http://127.0.0.1:9200'),
-  //       id: 'a1',
-  //       roles: {
-  //         master: true,
-  //         data: true,
-  //         ingest: true
-  //       }
-  //     }, {
-  //       url: new URL('http://127.0.0.1:9201'),
-  //       id: 'a2',
-  //       roles: {
-  //         master: true,
-  //         data: true,
-  //         ingest: true
-  //       }
-  //     }])
+  t.test('update', t => {
+    t.test('Should not update existing connections', t => {
+      t.plan(2)
+      const pool = new WeightedConnectionPool({ Connection })
 
-  //     pool.update([{
-  //       url: new URL('http://127.0.0.1:9200'),
-  //       id: 'a1',
-  //       roles: null
-  //     }, {
-  //       url: new URL('http://127.0.0.1:9201'),
-  //       id: 'a2',
-  //       roles: null
-  //     }])
+      pool.addConnection([{
+        url: new URL('http://127.0.0.1:9200'),
+        id: 'a1',
+        roles: {
+          master: true,
+          data: true,
+          ingest: true
+        }
+      }, {
+        url: new URL('http://127.0.0.1:9201'),
+        id: 'a2',
+        roles: {
+          master: true,
+          data: true,
+          ingest: true
+        }
+      }])
 
-  //     t.ok(pool.connections.get('a1').roles !== null)
-  //     t.ok(pool.connections.get('a2').roles !== null)
-  //   })
+      pool.update([{
+        url: new URL('http://127.0.0.1:9200'),
+        id: 'a1',
+        roles: null
+      }, {
+        url: new URL('http://127.0.0.1:9201'),
+        id: 'a2',
+        roles: null
+      }])
 
-  //   t.test('Should not update existing connections (mark alive)', t => {
-  //     t.plan(4)
-  //     class CustomWeightedConnectionPool extends WeightedConnectionPool {
-  //       markAlive (connection) {
-  //         t.ok('called')
-  //         super.markAlive(connection)
-  //       }
-  //     }
-  //     const pool = new CustomWeightedConnectionPool({ Connection })
-  //     const conn1 = pool.addConnection({
-  //       url: new URL('http://127.0.0.1:9200'),
-  //       id: 'a1',
-  //       roles: {
-  //         master: true,
-  //         data: true,
-  //         ingest: true
-  //       }
-  //     })
+      t.ok(pool.connections[0].roles !== null)
+      t.ok(pool.connections[1].roles !== null)
+    })
 
-  //     const conn2 = pool.addConnection({
-  //       url: new URL('http://127.0.0.1:9201'),
-  //       id: 'a2',
-  //       roles: {
-  //         master: true,
-  //         data: true,
-  //         ingest: true
-  //       }
-  //     })
+    t.test('Should not update existing connections (mark alive)', t => {
+      t.plan(5)
+      class CustomWeightedConnectionPool extends WeightedConnectionPool {
+        markAlive (connection) {
+          t.ok('called')
+          super.markAlive(connection)
+        }
+      }
+      const pool = new CustomWeightedConnectionPool({ Connection })
+      const conn1 = pool.addConnection({
+        url: new URL('http://127.0.0.1:9200'),
+        id: 'a1',
+        roles: {
+          master: true,
+          data: true,
+          ingest: true
+        }
+      })
 
-  //     pool.markDead(conn1)
-  //     pool.markDead(conn2)
+      const conn2 = pool.addConnection({
+        url: new URL('http://127.0.0.1:9201'),
+        id: 'a2',
+        roles: {
+          master: true,
+          data: true,
+          ingest: true
+        }
+      })
 
-  //     pool.update([{
-  //       url: new URL('http://127.0.0.1:9200'),
-  //       id: 'a1',
-  //       roles: null
-  //     }, {
-  //       url: new URL('http://127.0.0.1:9201'),
-  //       id: 'a2',
-  //       roles: null
-  //     }])
+      pool.markDead(conn1)
+      pool.markDead(conn2)
 
-  //     t.ok(pool.connections.get('a1').roles !== null)
-  //     t.ok(pool.connections.get('a2').roles !== null)
-  //   })
+      pool.update([{
+        url: new URL('http://127.0.0.1:9200'),
+        id: 'a1',
+        roles: null
+      }, {
+        url: new URL('http://127.0.0.1:9201'),
+        id: 'a2',
+        roles: null
+      }])
 
-  //   t.test('Should not update existing connections (same url, different id)', t => {
-  //     t.plan(2)
-  //     class CustomWeightedConnectionPool extends WeightedConnectionPool {
-  //       markAlive () {
-  //         t.fail('Should not be called')
-  //       }
-  //     }
-  //     const pool = new CustomWeightedConnectionPool({ Connection })
-  //     pool.addConnection([{
-  //       url: new URL('http://127.0.0.1:9200'),
-  //       id: 'http://127.0.0.1:9200/',
-  //       roles: {
-  //         master: true,
-  //         data: true,
-  //         ingest: true
-  //       }
-  //     }])
+      t.ok(pool.connections[0].roles !== null)
+      t.ok(pool.connections[1].roles !== null)
+    })
 
-  //     pool.update([{
-  //       url: new URL('http://127.0.0.1:9200'),
-  //       id: 'a1',
-  //       roles: true
-  //     }])
+    t.test('Should not update existing connections (same url, different id)', t => {
+      t.plan(3)
+      const pool = new WeightedConnectionPool({ Connection })
 
-  //     // roles will never be updated, we only use it to do
-  //     // a dummy check to see if the connection has been updated
-  //     t.deepEqual(pool.connections.get('a1').roles, {
-  //       master: true,
-  //       data: true,
-  //       ingest: true,
-  //       ml: false
-  //     })
-  //     t.strictEqual(pool.connections.get('http://127.0.0.1:9200/'), undefined)
-  //   })
+      pool.addConnection({
+        url: new URL('http://127.0.0.1:9200'),
+        id: 'http://127.0.0.1:9200/',
+        roles: {
+          master: true,
+          data: true,
+          ingest: true
+        }
+      })
 
-  //   t.test('Add a new connection', t => {
-  //     t.plan(2)
-  //     const pool = new WeightedConnectionPool({ Connection })
-  //     pool.addConnection({
-  //       url: new URL('http://127.0.0.1:9200'),
-  //       id: 'a1',
-  //       roles: {
-  //         master: true,
-  //         data: true,
-  //         ingest: true
-  //       }
-  //     })
+      pool.update([{
+        url: new URL('http://127.0.0.1:9200'),
+        id: 'a1',
+        roles: true
+      }])
 
-  //     pool.update([{
-  //       url: new URL('http://127.0.0.1:9200'),
-  //       id: 'a1',
-  //       roles: null
-  //     }, {
-  //       url: new URL('http://127.0.0.1:9201'),
-  //       id: 'a2',
-  //       roles: null
-  //     }])
+      // roles will never be updated, we only use it to do
+      // a dummy check to see if the connection has been updated
+      t.deepEqual(pool.connections[0].roles, {
+        master: true,
+        data: true,
+        ingest: true,
+        ml: false
+      })
+      t.strictEqual(pool.connections[0].id, 'a1')
+      t.strictEqual(pool.size, 1)
+    })
 
-  //     t.ok(pool.connections.get('a1').roles !== null)
-  //     t.true(pool.connections.has('a2'))
-  //   })
+    t.test('Add a new connection', t => {
+      t.plan(2)
+      const pool = new WeightedConnectionPool({ Connection })
+      pool.addConnection({
+        url: new URL('http://127.0.0.1:9200'),
+        id: 'a1',
+        roles: {
+          master: true,
+          data: true,
+          ingest: true
+        }
+      })
 
-  //   t.test('Remove old connections', t => {
-  //     t.plan(3)
-  //     const pool = new WeightedConnectionPool({ Connection })
-  //     pool.addConnection({
-  //       url: new URL('http://127.0.0.1:9200'),
-  //       id: 'a1',
-  //       roles: null
-  //     })
+      pool.update([{
+        url: new URL('http://127.0.0.1:9200'),
+        id: 'a1',
+        roles: null
+      }, {
+        url: new URL('http://127.0.0.1:9201'),
+        id: 'a2',
+        roles: null
+      }])
 
-  //     pool.update([{
-  //       url: new URL('http://127.0.0.1:9200'),
-  //       id: 'a2',
-  //       roles: null
-  //     }, {
-  //       url: new URL('http://127.0.0.1:9201'),
-  //       id: 'a3',
-  //       roles: null
-  //     }])
+      t.ok(pool.connections[0].roles !== null)
+      t.strictEqual(pool.size, 2)
+    })
 
-  //     t.false(pool.connections.has('a1'))
-  //     t.true(pool.connections.has('a2'))
-  //     t.true(pool.connections.has('a3'))
-  //   })
+    t.test('Remove old connections', t => {
+      t.plan(3)
+      const pool = new WeightedConnectionPool({ Connection })
+      pool.addConnection({
+        url: new URL('http://127.0.0.1:9200'),
+        id: 'a1',
+        roles: null
+      })
 
-  //   t.end()
-  // })
+      pool.update([{
+        url: new URL('http://127.0.0.1:9200'),
+        id: 'a2',
+        roles: null
+      }, {
+        url: new URL('http://127.0.0.1:9201'),
+        id: 'a3',
+        roles: null
+      }])
+
+      t.strictEqual(pool.connections[0].id, 'a2')
+      t.strictEqual(pool.connections[1].id, 'a3')
+      t.strictEqual(pool.size, 2)
+    })
+
+    t.end()
+  })
 
   t.end()
 })
