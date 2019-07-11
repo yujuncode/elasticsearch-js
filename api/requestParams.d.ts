@@ -362,7 +362,6 @@ export interface Create<T = any> extends Generic {
   index: string;
   type?: string;
   wait_for_active_shards?: string;
-  parent?: string;
   refresh?: 'true' | 'false' | 'wait_for';
   routing?: string;
   timeout?: string;
@@ -377,7 +376,6 @@ export interface Delete extends Generic {
   index: string;
   type?: string;
   wait_for_active_shards?: string;
-  parent?: string;
   refresh?: 'true' | 'false' | 'wait_for';
   routing?: string;
   timeout?: string;
@@ -407,7 +405,7 @@ export interface DeleteByQuery<T = any> extends Generic {
   scroll?: string;
   search_type?: 'query_then_fetch' | 'dfs_query_then_fetch';
   search_timeout?: string;
-  size?: number;
+  max_docs?: number;
   sort?: string | string[];
   _source?: string | string[];
   _source_excludes?: string | string[];
@@ -444,7 +442,6 @@ export interface Exists extends Generic {
   _source_exclude?: string | string[];
   _source_include?: string | string[];
   stored_fields?: string | string[];
-  parent?: string;
   preference?: string;
   realtime?: boolean;
   refresh?: boolean;
@@ -462,7 +459,6 @@ export interface ExistsSource extends Generic {
   type?: string;
   _source_exclude?: string | string[];
   _source_include?: string | string[];
-  parent?: string;
   preference?: string;
   realtime?: boolean;
   refresh?: boolean;
@@ -486,7 +482,6 @@ export interface Explain<T = any> extends Generic {
   df?: string;
   stored_fields?: string | string[];
   lenient?: boolean;
-  parent?: string;
   preference?: string;
   q?: string;
   routing?: string;
@@ -512,7 +507,6 @@ export interface Get extends Generic {
   _source_exclude?: string | string[];
   _source_include?: string | string[];
   stored_fields?: string | string[];
-  parent?: string;
   preference?: string;
   realtime?: boolean;
   refresh?: boolean;
@@ -535,7 +529,6 @@ export interface GetSource extends Generic {
   type?: string;
   _source_exclude?: string | string[];
   _source_include?: string | string[];
-  parent?: string;
   preference?: string;
   realtime?: boolean;
   refresh?: boolean;
@@ -553,7 +546,6 @@ export interface Index<T = any> extends Generic {
   type?: string;
   wait_for_active_shards?: string;
   op_type?: 'index' | 'create';
-  parent?: string;
   refresh?: 'true' | 'false' | 'wait_for';
   routing?: string;
   timeout?: string;
@@ -992,7 +984,6 @@ export interface Mtermvectors<T = any> extends Generic {
   payloads?: boolean;
   preference?: string;
   routing?: string;
-  parent?: string;
   realtime?: boolean;
   version?: number;
   version_type?: 'internal' | 'external' | 'external_gte' | 'force';
@@ -1068,6 +1059,7 @@ export interface Reindex<T = any> extends Generic {
   requests_per_second?: number;
   scroll?: string;
   slices?: number;
+  max_docs?: number;
   body: T;
 }
 
@@ -1079,10 +1071,6 @@ export interface ReindexRethrottle extends Generic {
 export interface RenderSearchTemplate<T = any> extends Generic {
   id?: string;
   body?: T;
-}
-
-export interface ScriptsPainlessContext extends Generic {
-  context?: string;
 }
 
 export interface ScriptsPainlessExecute<T = any> extends Generic {
@@ -1270,7 +1258,6 @@ export interface Termvectors<T = any> extends Generic {
   payloads?: boolean;
   preference?: string;
   routing?: string;
-  parent?: string;
   realtime?: boolean;
   version?: number;
   version_type?: 'internal' | 'external' | 'external_gte' | 'force';
@@ -1288,7 +1275,6 @@ export interface Update<T = any> extends Generic {
   _source_excludes?: string | string[];
   _source_includes?: string | string[];
   lang?: string;
-  parent?: string;
   refresh?: 'true' | 'false' | 'wait_for';
   retry_on_conflict?: number;
   routing?: string;
@@ -1319,7 +1305,7 @@ export interface UpdateByQuery<T = any> extends Generic {
   scroll?: string;
   search_type?: 'query_then_fetch' | 'dfs_query_then_fetch';
   search_timeout?: string;
-  size?: number;
+  max_docs?: number;
   sort?: string | string[];
   _source?: string | string[];
   _source_excludes?: string | string[];
@@ -1400,12 +1386,14 @@ export interface DataFrameGetDataFrameTransform extends Generic {
   transform_id?: string;
   from?: number;
   size?: number;
+  allow_no_match?: boolean;
 }
 
 export interface DataFrameGetDataFrameTransformStats extends Generic {
   transform_id?: string;
   from?: number;
   size?: number;
+  allow_no_match?: boolean;
 }
 
 export interface DataFramePreviewDataFrameTransform<T = any> extends Generic {
@@ -1426,6 +1414,7 @@ export interface DataFrameStopDataFrameTransform extends Generic {
   transform_id: string;
   wait_for_completion?: boolean;
   timeout?: string;
+  allow_no_match?: boolean;
 }
 
 export interface GraphExplore<T = any> extends Generic {
@@ -1483,6 +1472,13 @@ export interface IndicesFreeze extends Generic {
   allow_no_indices?: boolean;
   expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
   wait_for_active_shards?: string;
+}
+
+export interface IndicesReloadSearchAnalyzers extends Generic {
+  index?: string | string[];
+  ignore_unavailable?: boolean;
+  allow_no_indices?: boolean;
+  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
 }
 
 export interface IndicesUnfreeze extends Generic {
@@ -1548,6 +1544,10 @@ export interface MlDeleteCalendarJob extends Generic {
   job_id: string;
 }
 
+export interface MlDeleteDataFrameAnalytics extends Generic {
+  id: string;
+}
+
 export interface MlDeleteDatafeed extends Generic {
   datafeed_id: string;
   force?: boolean;
@@ -1578,8 +1578,13 @@ export interface MlDeleteModelSnapshot extends Generic {
   snapshot_id: string;
 }
 
+export interface MlEvaluateDataFrame<T = any> extends Generic {
+  body: T;
+}
+
 export interface MlFindFileStructure<T = any> extends Generic {
   lines_to_sample?: number;
+  line_merge_size_limit?: number;
   timeout?: string;
   charset?: string;
   format?: 'ndjson' | 'xml' | 'delimited' | 'semi_structured_text';
@@ -1648,6 +1653,20 @@ export interface MlGetCategories<T = any> extends Generic {
   from?: number;
   size?: number;
   body?: T;
+}
+
+export interface MlGetDataFrameAnalytics extends Generic {
+  id?: string;
+  allow_no_match?: boolean;
+  from?: number;
+  size?: number;
+}
+
+export interface MlGetDataFrameAnalyticsStats extends Generic {
+  id?: string;
+  allow_no_match?: boolean;
+  from?: number;
+  size?: number;
 }
 
 export interface MlGetDatafeedStats extends Generic {
@@ -1761,6 +1780,11 @@ export interface MlPutCalendarJob extends Generic {
   job_id: string;
 }
 
+export interface MlPutDataFrameAnalytics<T = any> extends Generic {
+  id: string;
+  body: T;
+}
+
 export interface MlPutDatafeed<T = any> extends Generic {
   datafeed_id: string;
   body: T;
@@ -1788,10 +1812,24 @@ export interface MlSetUpgradeMode extends Generic {
   timeout?: string;
 }
 
+export interface MlStartDataFrameAnalytics<T = any> extends Generic {
+  id: string;
+  timeout?: string;
+  body?: T;
+}
+
 export interface MlStartDatafeed<T = any> extends Generic {
   datafeed_id: string;
   start?: string;
   end?: string;
+  timeout?: string;
+  body?: T;
+}
+
+export interface MlStopDataFrameAnalytics<T = any> extends Generic {
+  id: string;
+  allow_no_match?: boolean;
+  force?: boolean;
   timeout?: string;
   body?: T;
 }
@@ -1938,6 +1976,9 @@ export interface SecurityGetApiKey extends Generic {
   name?: string;
   username?: string;
   realm_name?: string;
+}
+
+export interface SecurityGetBuiltinPrivileges extends Generic {
 }
 
 export interface SecurityGetPrivileges extends Generic {

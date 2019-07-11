@@ -20,7 +20,7 @@
 /// <reference types="node" />
 
 import { EventEmitter } from 'events';
-import { SecureContextOptions } from 'tls';
+import { ConnectionOptions as TlsConnectionOptions } from 'tls';
 import Transport, {
   ApiResponse,
   RequestEvent,
@@ -31,6 +31,7 @@ import Transport, {
   generateRequestIdFn,
   TransportRequestCallback
 } from './lib/Transport';
+import { URL } from 'url';
 import Connection, { AgentOptions, agentFn } from './lib/Connection';
 import ConnectionPool, { ResurrectEvent } from './lib/ConnectionPool';
 import Serializer from './lib/Serializer';
@@ -72,8 +73,22 @@ interface ClientExtends {
 }
 // /Extend API
 
+interface NodeOptions {
+  url: URL;
+  id?: string;
+  agent?: AgentOptions;
+  ssl?: TlsConnectionOptions;
+  headers?: anyObject;
+  roles?: {
+    master: boolean;
+    data: boolean;
+    ingest: boolean;
+    ml: boolean;
+  }
+}
+
 interface ClientOptions {
-  node?: string | string[];
+  node?: string | string[] | NodeOptions | NodeOptions[];
   nodes?: string | string[];
   Connection?: typeof Connection;
   ConnectionPool?: typeof ConnectionPool;
@@ -89,7 +104,7 @@ interface ClientOptions {
   resurrectStrategy?: 'ping' | 'optimistic' | 'none';
   suggestCompression?: boolean;
   compression?: 'gzip';
-  ssl?: SecureContextOptions;
+  ssl?: TlsConnectionOptions;
   agent?: AgentOptions | agentFn;
   nodeFilter?: nodeFilterFn;
   nodeSelector?: nodeSelectorFn | string;
@@ -297,6 +312,8 @@ declare class Client extends EventEmitter {
     putTemplate: ApiMethod<RequestParams.IndicesPutTemplate>
     recovery: ApiMethod<RequestParams.IndicesRecovery>
     refresh: ApiMethod<RequestParams.IndicesRefresh>
+    reload_search_analyzers: ApiMethod<RequestParams.IndicesReloadSearchAnalyzers>
+    reloadSearchAnalyzers: ApiMethod<RequestParams.IndicesReloadSearchAnalyzers>
     rollover: ApiMethod<RequestParams.IndicesRollover>
     segments: ApiMethod<RequestParams.IndicesSegments>
     shard_stores: ApiMethod<RequestParams.IndicesShardStores>
@@ -349,6 +366,8 @@ declare class Client extends EventEmitter {
     deleteCalendarEvent: ApiMethod<RequestParams.MlDeleteCalendarEvent>
     delete_calendar_job: ApiMethod<RequestParams.MlDeleteCalendarJob>
     deleteCalendarJob: ApiMethod<RequestParams.MlDeleteCalendarJob>
+    delete_data_frame_analytics: ApiMethod<RequestParams.MlDeleteDataFrameAnalytics>
+    deleteDataFrameAnalytics: ApiMethod<RequestParams.MlDeleteDataFrameAnalytics>
     delete_datafeed: ApiMethod<RequestParams.MlDeleteDatafeed>
     deleteDatafeed: ApiMethod<RequestParams.MlDeleteDatafeed>
     delete_expired_data: ApiMethod<RequestParams.MlDeleteExpiredData>
@@ -361,6 +380,8 @@ declare class Client extends EventEmitter {
     deleteJob: ApiMethod<RequestParams.MlDeleteJob>
     delete_model_snapshot: ApiMethod<RequestParams.MlDeleteModelSnapshot>
     deleteModelSnapshot: ApiMethod<RequestParams.MlDeleteModelSnapshot>
+    evaluate_data_frame: ApiMethod<RequestParams.MlEvaluateDataFrame>
+    evaluateDataFrame: ApiMethod<RequestParams.MlEvaluateDataFrame>
     find_file_structure: ApiMethod<RequestParams.MlFindFileStructure>
     findFileStructure: ApiMethod<RequestParams.MlFindFileStructure>
     flush_job: ApiMethod<RequestParams.MlFlushJob>
@@ -374,6 +395,10 @@ declare class Client extends EventEmitter {
     getCalendars: ApiMethod<RequestParams.MlGetCalendars>
     get_categories: ApiMethod<RequestParams.MlGetCategories>
     getCategories: ApiMethod<RequestParams.MlGetCategories>
+    get_data_frame_analytics: ApiMethod<RequestParams.MlGetDataFrameAnalytics>
+    getDataFrameAnalytics: ApiMethod<RequestParams.MlGetDataFrameAnalytics>
+    get_data_frame_analytics_stats: ApiMethod<RequestParams.MlGetDataFrameAnalyticsStats>
+    getDataFrameAnalyticsStats: ApiMethod<RequestParams.MlGetDataFrameAnalyticsStats>
     get_datafeed_stats: ApiMethod<RequestParams.MlGetDatafeedStats>
     getDatafeedStats: ApiMethod<RequestParams.MlGetDatafeedStats>
     get_datafeeds: ApiMethod<RequestParams.MlGetDatafeeds>
@@ -405,6 +430,8 @@ declare class Client extends EventEmitter {
     putCalendar: ApiMethod<RequestParams.MlPutCalendar>
     put_calendar_job: ApiMethod<RequestParams.MlPutCalendarJob>
     putCalendarJob: ApiMethod<RequestParams.MlPutCalendarJob>
+    put_data_frame_analytics: ApiMethod<RequestParams.MlPutDataFrameAnalytics>
+    putDataFrameAnalytics: ApiMethod<RequestParams.MlPutDataFrameAnalytics>
     put_datafeed: ApiMethod<RequestParams.MlPutDatafeed>
     putDatafeed: ApiMethod<RequestParams.MlPutDatafeed>
     put_filter: ApiMethod<RequestParams.MlPutFilter>
@@ -415,8 +442,12 @@ declare class Client extends EventEmitter {
     revertModelSnapshot: ApiMethod<RequestParams.MlRevertModelSnapshot>
     set_upgrade_mode: ApiMethod<RequestParams.MlSetUpgradeMode>
     setUpgradeMode: ApiMethod<RequestParams.MlSetUpgradeMode>
+    start_data_frame_analytics: ApiMethod<RequestParams.MlStartDataFrameAnalytics>
+    startDataFrameAnalytics: ApiMethod<RequestParams.MlStartDataFrameAnalytics>
     start_datafeed: ApiMethod<RequestParams.MlStartDatafeed>
     startDatafeed: ApiMethod<RequestParams.MlStartDatafeed>
+    stop_data_frame_analytics: ApiMethod<RequestParams.MlStopDataFrameAnalytics>
+    stopDataFrameAnalytics: ApiMethod<RequestParams.MlStopDataFrameAnalytics>
     stop_datafeed: ApiMethod<RequestParams.MlStopDatafeed>
     stopDatafeed: ApiMethod<RequestParams.MlStopDatafeed>
     update_datafeed: ApiMethod<RequestParams.MlUpdateDatafeed>
@@ -475,8 +506,6 @@ declare class Client extends EventEmitter {
     stop_job: ApiMethod<RequestParams.RollupStopJob>
     stopJob: ApiMethod<RequestParams.RollupStopJob>
   }
-  scripts_painless_context: ApiMethod<RequestParams.ScriptsPainlessContext>
-  scriptsPainlessContext: ApiMethod<RequestParams.ScriptsPainlessContext>
   scripts_painless_execute: ApiMethod<RequestParams.ScriptsPainlessExecute>
   scriptsPainlessExecute: ApiMethod<RequestParams.ScriptsPainlessExecute>
   scroll: ApiMethod<RequestParams.Scroll>
@@ -509,6 +538,8 @@ declare class Client extends EventEmitter {
     enableUser: ApiMethod<RequestParams.SecurityEnableUser>
     get_api_key: ApiMethod<RequestParams.SecurityGetApiKey>
     getApiKey: ApiMethod<RequestParams.SecurityGetApiKey>
+    get_builtin_privileges: ApiMethod<RequestParams.SecurityGetBuiltinPrivileges>
+    getBuiltinPrivileges: ApiMethod<RequestParams.SecurityGetBuiltinPrivileges>
     get_privileges: ApiMethod<RequestParams.SecurityGetPrivileges>
     getPrivileges: ApiMethod<RequestParams.SecurityGetPrivileges>
     get_role: ApiMethod<RequestParams.SecurityGetRole>
@@ -616,5 +647,6 @@ export {
   ResurrectEvent,
   RequestParams,
   ClientOptions,
+  NodeOptions,
   ClientExtendsCallbackOptions
 };
