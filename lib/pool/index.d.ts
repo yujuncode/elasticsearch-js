@@ -170,6 +170,14 @@ declare class CloudConnectionPool extends BaseConnectionPool {
   getConnection(): Connection;
 }
 
+declare class WeightedConnectionPool extends BaseConnectionPool {
+  index: number;
+  maxWeight: number;
+  greatestCommonDivisor: number;
+  currentWeight: number;
+  constructor(opts?: ConnectionPoolOptions);
+}
+
 declare function defaultNodeFilter(node: Connection): boolean;
 declare function roundRobinSelector(): (connections: Connection[]) => Connection;
 declare function randomSelector(connections: Connection[]): Connection;
@@ -192,5 +200,6 @@ export {
   // Classes
   BaseConnectionPool,
   ConnectionPool,
-  CloudConnectionPool
+  CloudConnectionPool,
+  WeightedConnectionPool
 };
