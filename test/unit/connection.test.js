@@ -11,7 +11,7 @@ const { URL } = require('url')
 const { Agent } = require('http')
 const intoStream = require('into-stream')
 const { buildServer } = require('../utils')
-const Connection = require('../../lib/Connection')
+const Connection = require('../../lib/connection/Connection')
 const { TimeoutError, ConfigurationError, RequestAbortedError } = require('../../lib/errors')
 
 test('Basic (http)', t => {

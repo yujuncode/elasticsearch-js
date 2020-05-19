@@ -7,7 +7,7 @@
 const { test } = require('tap')
 const { URL } = require('url')
 const BaseConnectionPool = require('../../lib/pool/BaseConnectionPool')
-const Connection = require('../../lib/Connection')
+const Connection = require('../../lib/connection/Connection')
 
 test('API', t => {
   t.test('addConnection', t => {

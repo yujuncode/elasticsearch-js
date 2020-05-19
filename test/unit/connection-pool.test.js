@@ -7,7 +7,7 @@
 const { test } = require('tap')
 const { URL } = require('url')
 const ConnectionPool = require('../../lib/pool/ConnectionPool')
-const Connection = require('../../lib/Connection')
+const Connection = require('../../lib/connection/Connection')
 const { defaultNodeFilter, roundRobinSelector } = require('../../lib/Transport').internals
 const { connection: { MockConnection, MockConnectionTimeout } } = require('../utils')
 

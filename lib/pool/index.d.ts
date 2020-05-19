@@ -6,7 +6,7 @@
 
 import { URL } from 'url'
 import { SecureContextOptions } from 'tls';
-import Connection, { AgentOptions } from '../Connection';
+import Connection, { AgentOptions } from '../connection/Connection';
 import { nodeFilterFn, nodeSelectorFn } from '../Transport';
 
 interface BaseConnectionPoolOptions {

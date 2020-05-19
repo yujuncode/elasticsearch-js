@@ -20,7 +20,7 @@ import Transport, {
   RequestNDBody
 } from './lib/Transport';
 import { URL } from 'url';
-import Connection, { AgentOptions, agentFn } from './lib/Connection';
+import Connection, { AgentOptions, agentFn } from './lib/connection/Connection';
 import {
   ConnectionPool,
   BaseConnectionPool,

@@ -6,7 +6,7 @@
 
 const { test } = require('tap')
 const { CloudConnectionPool } = require('../../lib/pool')
-const Connection = require('../../lib/Connection')
+const Connection = require('../../lib/connection/Connection')
 
 test('Should expose a cloudConnection property', t => {
   const pool = new CloudConnectionPool({ Connection })

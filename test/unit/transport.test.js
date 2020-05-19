@@ -26,7 +26,7 @@ const {
 } = require('../../lib/errors')
 
 const ConnectionPool = require('../../lib/pool/ConnectionPool')
-const Connection = require('../../lib/Connection')
+const Connection = require('../../lib/connection/Connection')
 const Serializer = require('../../lib/Serializer')
 const Transport = require('../../lib/Transport')
 

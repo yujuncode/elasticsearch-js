@@ -4,7 +4,7 @@
 
 import { Readable as ReadableStream } from 'stream';
 import { ConnectionPool, CloudConnectionPool } from './pool';
-import Connection from './Connection';
+import Connection from './connection/Connection';
 import Serializer from './Serializer';
 import * as errors from './errors';
 
