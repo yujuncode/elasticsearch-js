@@ -58,7 +58,7 @@ function start (opts) {
       { encoding: 'utf8' }
     )
 
-    const { fn: factory, types } = genFactory(apiOutputFolder)
+    const { fn: factory, types } = genFactory(apiOutputFolder, [apiFolder, xPackFolder])
     writeFileSync(
       mainOutputFile,
       factory,
@@ -101,6 +101,8 @@ function start (opts) {
       log.text = `Processing ${file}`
 
       const spec = require(join(apiFolder, file))
+      // const { stability } = spec[Object.keys(spec)[0]]
+      // if (stability !== 'stable') return
       allSpec.push(spec)
       const code = generate(opts.branch || opts.tag, spec, common)
       const filePath = join(apiOutputFolder, `${file.slice(0, file.lastIndexOf('.'))}.js`)

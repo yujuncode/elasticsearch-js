@@ -10,19 +10,12 @@
 function buildTasksCancel (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [tasks.cancel](https://www.elastic.co/guide/en/elasticsearch/reference/master/tasks.html) request
-   *
-   * @param {string} task_id - Cancel the task with specified task id (node_id:task_number)
-   * @param {list} nodes - A comma-separated list of node IDs or names to limit the returned information; use `_local` to return information from the node you're connecting to, leave empty to get information from all nodes
-   * @param {list} actions - A comma-separated list of actions that should be cancelled. Leave empty to cancel all.
-   * @param {string} parent_task_id - Cancel tasks with specified parent task id (node_id:task_number). Set to -1 to cancel all.
-   */
 
   const acceptedQuerystring = [
     'nodes',
     'actions',
     'parent_task_id',
+    'wait_for_completion',
     'pretty',
     'human',
     'error_trace',
@@ -32,10 +25,16 @@ function buildTasksCancel (opts) {
 
   const snakeCase = {
     parentTaskId: 'parent_task_id',
+    waitForCompletion: 'wait_for_completion',
     errorTrace: 'error_trace',
     filterPath: 'filter_path'
   }
 
+  /**
+   * Perform a tasks.cancel request
+   * Cancels a task, if it can be cancelled through an API.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/master/tasks.html
+   */
   return function tasksCancel (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -48,12 +47,6 @@ function buildTasksCancel (opts) {
       options = {}
     }
 
-    // check required parameters
-    if (params.body != null) {
-      const err = new ConfigurationError('This API does not require a body')
-      return handleError(err, callback)
-    }
-
     // validate headers object
     if (options.headers != null && typeof options.headers !== 'object') {
       const err = new ConfigurationError(`Headers should be an object, instead got: ${typeof options.headers}`)
@@ -64,10 +57,6 @@ function buildTasksCancel (opts) {
     var { method, body, taskId, task_id, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = 'POST'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -76,8 +65,10 @@ function buildTasksCancel (opts) {
     var path = ''
 
     if ((task_id || taskId) != null) {
+      if (method == null) method = 'POST'
       path = '/' + '_tasks' + '/' + encodeURIComponent(task_id || taskId) + '/' + '_cancel'
     } else {
+      if (method == null) method = 'POST'
       path = '/' + '_tasks' + '/' + '_cancel'
     }
 
@@ -85,7 +76,7 @@ function buildTasksCancel (opts) {
     const request = {
       method,
       path,
-      body: '',
+      body: body || '',
       querystring
     }
 

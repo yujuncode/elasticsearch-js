@@ -10,21 +10,26 @@
 function buildMlPutDatafeed (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [ml.put_datafeed](http://www.elastic.co/guide/en/elasticsearch/reference/current/ml-put-datafeed.html) request
-   *
-   * @param {string} datafeed_id - The ID of the datafeed to create
-   * @param {object} body - The datafeed config
-   */
 
   const acceptedQuerystring = [
-
+    'ignore_unavailable',
+    'allow_no_indices',
+    'ignore_throttled',
+    'expand_wildcards'
   ]
 
   const snakeCase = {
-
+    ignoreUnavailable: 'ignore_unavailable',
+    allowNoIndices: 'allow_no_indices',
+    ignoreThrottled: 'ignore_throttled',
+    expandWildcards: 'expand_wildcards'
   }
 
+  /**
+   * Perform a ml.put_datafeed request
+   * Instantiates a datafeed.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-put-datafeed.html
+   */
   return function mlPutDatafeed (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -57,10 +62,6 @@ function buildMlPutDatafeed (opts) {
     var { method, body, datafeedId, datafeed_id, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = 'PUT'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -68,6 +69,7 @@ function buildMlPutDatafeed (opts) {
 
     var path = ''
 
+    if (method == null) method = 'PUT'
     path = '/' + '_ml' + '/' + 'datafeeds' + '/' + encodeURIComponent(datafeed_id || datafeedId)
 
     // build request object

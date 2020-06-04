@@ -10,11 +10,6 @@
 function buildRollupStartJob (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [rollup.start_job]() request
-   *
-   * @param {string} id - The ID of the job to start
-   */
 
   const acceptedQuerystring = [
 
@@ -24,6 +19,11 @@ function buildRollupStartJob (opts) {
 
   }
 
+  /**
+   * Perform a rollup.start_job request
+   * Starts an existing, stopped rollup job.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-start-job.html
+   */
   return function rollupStartJob (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -52,10 +52,6 @@ function buildRollupStartJob (opts) {
     var { method, body, id, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = 'POST'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -63,6 +59,7 @@ function buildRollupStartJob (opts) {
 
     var path = ''
 
+    if (method == null) method = 'POST'
     path = '/' + '_rollup' + '/' + 'job' + '/' + encodeURIComponent(id) + '/' + '_start'
 
     // build request object

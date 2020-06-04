@@ -6,12 +6,23 @@
 
 const semver = require('semver')
 const deprecatedParameters = require('./patch.json')
+const { ndjsonApi } = require('./generateApis')
+
+const ndjsonApiKey = ndjsonApi
+  .map(api => {
+    return api
+      .replace(/\.([a-z])/g, k => k[1].toUpperCase())
+      .replace(/_([a-z])/g, k => k[1].toUpperCase())
+  })
+  .map(toPascalCase)
 
 function generate (version, api) {
   const release = semver.valid(version) ? semver.major(version) : version
   var types = `// Licensed to Elasticsearch B.V under one or more agreements.
 // Elasticsearch B.V licenses this file to you under the Apache 2.0 License.
 // See the LICENSE file in the project root for more information
+
+import { RequestBody, RequestNDBody } from '../lib/Transport'
 
 export interface Generic {
   method?: string;
@@ -33,11 +44,34 @@ export interface Generic {
       .replace(/\.([a-z])/g, k => k[1].toUpperCase())
       .replace(/_([a-z])/g, k => k[1].toUpperCase())
 
-    const { parts = {}, params = {} } = spec[api].url
-    const { body } = spec[api]
+    const { paths = {} } = spec[api].url
+    const { body, params = {} } = spec[api]
 
-    const partsArr = Object.keys(parts)
-      .map(k => ({ key: k, value: parts[k] }))
+    // get the required parts from the url
+    // if the url has at least one static path,
+    // then there are not required parts of the url
+    var allParts = []
+    var requiredParts = []
+    for (const path of paths) {
+      if (path.parts) {
+        allParts.push(Object.keys(path.parts))
+      } else {
+        allParts = []
+        break
+      }
+    }
+    if (allParts.length > 0) {
+      requiredParts = intersect(...allParts)
+    }
+
+    const parts = paths.reduce((acc, path) => {
+      if (!path.parts) return acc
+      for (const part in path.parts) {
+        if (acc[part] != null) continue
+        acc[part] = { key: part, value: path.parts[part], required: requiredParts.includes(part) }
+      }
+      return acc
+    }, {})
     const deprecatedParametersToAdd = []
     const paramsArr = Object.keys(params)
       .filter(k => !Object.keys(parts).includes(k))
@@ -45,21 +79,25 @@ export interface Generic {
         if (deprecatedParameters[release] && deprecatedParameters[release][k]) {
           deprecatedParametersToAdd.push({
             key: deprecatedParameters[release][k],
-            value: params[k]
+            value: params[k],
+            required: params[k].required
           })
         }
-        return { key: k, value: params[k] }
+        return { key: k, value: params[k], required: params[k].required }
       })
 
+    const partsArr = Object.keys(parts).map(k => parts[k])
     deprecatedParametersToAdd.forEach(k => partsArr.push(k))
 
     const genLine = e => {
-      const optional = e.value.required ? '' : '?'
+      const optional = e.required ? '' : '?'
       return `${e.key}${optional}: ${getType(e.value.type, e.value.options)};`
     }
 
+    const bodyGeneric = ndjsonApiKey.includes(toPascalCase(name)) ? 'RequestNDBody' : 'RequestBody'
+
     const code = `
-export interface ${name[0].toUpperCase() + name.slice(1)}${body ? '<T = any>' : ''} extends Generic {
+export interface ${toPascalCase(name)}${body ? `<T = ${bodyGeneric}>` : ''} extends Generic {
   ${partsArr.map(genLine).join('\n  ')}
   ${paramsArr.map(genLine).join('\n  ')}
   ${body ? `body${body.required ? '' : '?'}: T;` : ''}
@@ -85,10 +123,22 @@ export interface ${name[0].toUpperCase() + name.slice(1)}${body ? '<T = any>' : 
       case 'double':
       case 'long':
         return 'number'
+      case 'boolean|long':
+        return 'boolean | number'
       default:
         return type
     }
   }
+}
+
+function intersect (first, ...rest) {
+  return rest.reduce((accum, current) => {
+    return accum.filter(x => current.indexOf(x) !== -1)
+  }, first)
+}
+
+function toPascalCase (str) {
+  return str[0].toUpperCase() + str.slice(1)
 }
 
 module.exports = generate

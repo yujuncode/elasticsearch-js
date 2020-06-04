@@ -10,15 +10,6 @@
 function buildRollupRollupSearch (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [rollup.rollup_search]() request
-   *
-   * @param {list} index - The indices or index-pattern(s) (containing rollup or regular data) that should be searched
-   * @param {string} type - The doc type inside the index
-   * @param {boolean} typed_keys - Specify whether aggregation and suggester names should be prefixed by their respective types in the response
-   * @param {boolean} rest_total_hits_as_int - Indicates whether hits.total should be rendered as an integer or an object in the rest search response
-   * @param {object} body - The search request body
-   */
 
   const acceptedQuerystring = [
     'typed_keys',
@@ -30,6 +21,11 @@ function buildRollupRollupSearch (opts) {
     restTotalHitsAsInt: 'rest_total_hits_as_int'
   }
 
+  /**
+   * Perform a rollup.rollup_search request
+   * Enables searching rolled-up data using the standard query DSL.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-search.html
+   */
   return function rollupRollupSearch (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -68,10 +64,6 @@ function buildRollupRollupSearch (opts) {
     var { method, body, index, type, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = body == null ? 'GET' : 'POST'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -80,8 +72,10 @@ function buildRollupRollupSearch (opts) {
     var path = ''
 
     if ((index) != null && (type) != null) {
+      if (method == null) method = body == null ? 'GET' : 'POST'
       path = '/' + encodeURIComponent(index) + '/' + encodeURIComponent(type) + '/' + '_rollup_search'
     } else {
+      if (method == null) method = body == null ? 'GET' : 'POST'
       path = '/' + encodeURIComponent(index) + '/' + '_rollup_search'
     }
 

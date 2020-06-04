@@ -10,20 +10,12 @@
 function buildRankEval (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [rank_eval](https://www.elastic.co/guide/en/elasticsearch/reference/master/search-rank-eval.html) request
-   *
-   * @param {list} index - A comma-separated list of index names to search; use `_all` or empty string to perform the operation on all indices
-   * @param {boolean} ignore_unavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
-   * @param {boolean} allow_no_indices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
-   * @param {enum} expand_wildcards - Whether to expand wildcard expression to concrete indices that are open, closed or both.
-   * @param {object} body - The ranking evaluation search definition, including search requests, document ratings and ranking metric definition.
-   */
 
   const acceptedQuerystring = [
     'ignore_unavailable',
     'allow_no_indices',
     'expand_wildcards',
+    'search_type',
     'pretty',
     'human',
     'error_trace',
@@ -35,10 +27,16 @@ function buildRankEval (opts) {
     ignoreUnavailable: 'ignore_unavailable',
     allowNoIndices: 'allow_no_indices',
     expandWildcards: 'expand_wildcards',
+    searchType: 'search_type',
     errorTrace: 'error_trace',
     filterPath: 'filter_path'
   }
 
+  /**
+   * Perform a rank_eval request
+   * Allows to evaluate the quality of ranked search results over a set of typical search queries
+   * https://www.elastic.co/guide/en/elasticsearch/reference/master/search-rank-eval.html
+   */
   return function rankEval (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -67,10 +65,6 @@ function buildRankEval (opts) {
     var { method, body, index, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = body == null ? 'GET' : 'POST'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -79,8 +73,10 @@ function buildRankEval (opts) {
     var path = ''
 
     if ((index) != null) {
+      if (method == null) method = body == null ? 'GET' : 'POST'
       path = '/' + encodeURIComponent(index) + '/' + '_rank_eval'
     } else {
+      if (method == null) method = body == null ? 'GET' : 'POST'
       path = '/' + '_rank_eval'
     }
 

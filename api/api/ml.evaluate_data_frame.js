@@ -10,11 +10,6 @@
 function buildMlEvaluateDataFrame (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [ml.evaluate_data_frame](http://www.elastic.co/guide/en/elasticsearch/reference/current/evaluate-dfanalytics.html) request
-   *
-   * @param {object} body - The evaluation definition
-   */
 
   const acceptedQuerystring = [
 
@@ -24,6 +19,11 @@ function buildMlEvaluateDataFrame (opts) {
 
   }
 
+  /**
+   * Perform a ml.evaluate_data_frame request
+   * Evaluates the data frame analytics for an annotated index.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/evaluate-dfanalytics.html
+   */
   return function mlEvaluateDataFrame (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -52,10 +52,6 @@ function buildMlEvaluateDataFrame (opts) {
     var { method, body, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = 'POST'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -63,6 +59,7 @@ function buildMlEvaluateDataFrame (opts) {
 
     var path = ''
 
+    if (method == null) method = 'POST'
     path = '/' + '_ml' + '/' + 'data_frame' + '/' + '_evaluate'
 
     // build request object

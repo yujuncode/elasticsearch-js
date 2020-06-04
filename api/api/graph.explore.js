@@ -10,15 +10,6 @@
 function buildGraphExplore (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [graph.explore](https://www.elastic.co/guide/en/elasticsearch/reference/current/graph-explore-api.html) request
-   *
-   * @param {list} index - A comma-separated list of index names to search; use `_all` or empty string to perform the operation on all indices
-   * @param {list} type - A comma-separated list of document types to search; leave empty to perform the operation on all types
-   * @param {string} routing - Specific routing value
-   * @param {time} timeout - Explicit operation timeout
-   * @param {object} body - Graph Query DSL
-   */
 
   const acceptedQuerystring = [
     'routing',
@@ -29,6 +20,11 @@ function buildGraphExplore (opts) {
 
   }
 
+  /**
+   * Perform a graph.explore request
+   * Explore extracted and summarized information about the documents and terms in an index.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/graph-explore-api.html
+   */
   return function graphExplore (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -41,9 +37,9 @@ function buildGraphExplore (opts) {
       options = {}
     }
 
-    // check required url components
-    if (params['type'] != null && (params['index'] == null)) {
-      const err = new ConfigurationError('Missing required parameter of the url: index')
+    // check required parameters
+    if (params['index'] == null) {
+      const err = new ConfigurationError('Missing required parameter: index')
       return handleError(err, callback)
     }
 
@@ -54,12 +50,8 @@ function buildGraphExplore (opts) {
     }
 
     var warnings = []
-    var { method, body, index, type, ...querystring } = params
+    var { method, body, index, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
-
-    if (method == null) {
-      method = body == null ? 'GET' : 'POST'
-    }
 
     var ignore = options.ignore
     if (typeof ignore === 'number') {
@@ -68,11 +60,8 @@ function buildGraphExplore (opts) {
 
     var path = ''
 
-    if ((index) != null && (type) != null) {
-      path = '/' + encodeURIComponent(index) + '/' + encodeURIComponent(type) + '/' + '_graph' + '/' + 'explore'
-    } else {
-      path = '/' + encodeURIComponent(index) + '/' + '_graph' + '/' + 'explore'
-    }
+    if (method == null) method = body == null ? 'GET' : 'POST'
+    path = '/' + encodeURIComponent(index) + '/' + '_graph' + '/' + 'explore'
 
     // build request object
     const request = {

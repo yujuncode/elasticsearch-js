@@ -10,12 +10,6 @@
 function buildSecurityPutPrivileges (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [security.put_privileges](TODO) request
-   *
-   * @param {enum} refresh - If `true` (the default) then refresh the affected shards to make this operation visible to search, if `wait_for` then wait for a refresh to make this operation visible to search, if `false` then do nothing with refreshes.
-   * @param {object} body - The privilege(s) to add
-   */
 
   const acceptedQuerystring = [
     'refresh'
@@ -25,6 +19,11 @@ function buildSecurityPutPrivileges (opts) {
 
   }
 
+  /**
+   * Perform a security.put_privileges request
+   * Adds or updates application privileges.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-privileges.html
+   */
   return function securityPutPrivileges (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -53,10 +52,6 @@ function buildSecurityPutPrivileges (opts) {
     var { method, body, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = 'PUT'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -64,6 +59,7 @@ function buildSecurityPutPrivileges (opts) {
 
     var path = ''
 
+    if (method == null) method = 'PUT'
     path = '/' + '_security' + '/' + 'privilege'
 
     // build request object

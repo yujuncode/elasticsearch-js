@@ -1,7 +1,9 @@
 [[client-usage]]
 == Usage
 
-Use the  client is pretty straightforward, it supports all the public APIs of Elasticsearch, and every method exposes the same signature.
+Using the client is straightforward, it supports all the public APIs of {es}, 
+and every method exposes the same signature.
+
 
 [source,js]
 ----
@@ -36,11 +38,14 @@ The returned value of every API call is formed as follows:
 }
 ----
 
-NOTE: The body will be a boolean value when using `HEAD` APIs.
+NOTE: The body is a boolean value when you use `HEAD` APIs.
 
-The above value will be returned even if there is an error during the execution of the request, this means that you can safely use the https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment[destructuring assignment].
+The above value is returned even if there is an error during the execution of 
+the request, this means that you can safely use the 
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment[destructuring assignment].
 
-The `meta` key contains all the information regarding the request, such as attempt, options, and the connection that has been used.
+The `meta` key contains all the information about the request, such as attempt, 
+options, and the connection that has been used.
 
 [source,js]
 ----
@@ -59,44 +64,37 @@ client.search({
 })
 ----
 
+
 === Aborting a request
 
-When using the callback style API, the function will also return an object that allows you to abort the API request.
+If needed, you can abort a running request by calling the `request.abort()` method returned by the API.
+
+CAUTION: If you abort a request, the request will fail with a `RequestAbortedError`.
+
 
 [source,js]
 ----
-// calback API
 const request = client.search({
   index: 'my-index',
   body: { foo: 'bar' }
 }, {
   ignore: [404],
   maxRetries: 3
-}, (err, { body }) => {
-  if (err) console.log(err)
+}, (err, result) => {
+  if (err) {
+    console.log(err) // RequestAbortedError
+  } else {
+    console.log(result)
+  }
 })
 
 request.abort()
 ----
 
-Aborting a request with the promise style API is not supported, but you can easily achieve that with convenience wrapper.
-
+The same behavior is valid for the promise style API as well.
 [source,js]
 ----
-function abortableRequest (params, options) {
-  var request = null
-  const promise = new Promise((resolve, reject) => {
-    request = client.search(params, options, (err, result) => {
-      err ? reject(err) : resolve(res)
-    })
-  })
-  return {
-    promise,
-    abort: () => request.abort()
-  }
-}
-
-const request = abortableRequest({
+const request = client.search({
   index: 'my-index',
   body: { foo: 'bar' }
 }, {
@@ -104,12 +102,17 @@ const request = abortableRequest({
   maxRetries: 3
 })
 
+request
+  .then(result => console.log(result))
+  .catch(err => console.log(err)) // RequestAbortedError
+
 request.abort()
-// access the promise with `request.promise.[method]`
 ----
+
 
 === Request specific options
 If needed you can pass request specific options in a second object:
+
 [source,js]
 ----
 // promise API
@@ -133,6 +136,7 @@ client.search({
 })
 ----
 
+
 The supported request specific options are:
 [cols=2*]
 |===
@@ -141,7 +145,7 @@ The supported request specific options are:
 _Default:_ `null`
 
 |`requestTimeout`
-|`number` - Max request timeout for the request, it overrides the client default. +
+|`number` - Max request timeout for the request in milliseconds, it overrides the client default. +
 _Default:_ `30000`
 
 |`maxRetries`
@@ -154,7 +158,7 @@ _Options:_ `false`, `'gzip'` +
 _Default:_ `false`
 
 |`asStream`
-|`boolean` - Instead of getting the parsed body back, you will get the raw Node.js stream of data. +
+|`boolean` - Instead of getting the parsed body back, you get the raw Node.js stream of data. +
 _Default:_ `false`
 
 |`headers`
@@ -170,13 +174,16 @@ _Default:_ `null`
 _Default:_ `null`
 
 |`context`
-|`any` - Custom object per request. _(you can use it to pass some data to the clients events)_ +
+|`any` - Custom object per request. _(you can use it to pass data to the clients events)_ +
 _Default:_ `null`
 |===
 
+
 === Error handling
-The client exposes a variety of error objects, that you can use to enhance your error handling. +
-You can find all the error objects inside the `errors` key in the client.
+
+The client exposes a variety of error objects that you can use to enhance your 
+error handling. You can find all the error objects inside the `errors` key in 
+the client.
 
 [source,js]
 ----
@@ -184,30 +191,67 @@ const { errors } = require('@elastic/elasticsearch')
 console.log(errors)
 ----
 
-Following you can find the errors exported by the client.
-[cols=2*]
+
+You can find the errors exported by the client in the table below.
+
+[cols=3*]
 |===
-|`ElasticsearchClientErrors`
+|*Error*
+|*Description*
+|*Properties*
+
+|`ElasticsearchClientError`
 |Every error inherits from this class, it is the basic error generated by the client.
+a|* `name` - `string`
+* `message` - `string`
 
 |`TimeoutError`
 |Generated when a request exceeds the `requestTimeout` option.
+a|* `name` - `string`
+* `message` - `string`
+* `meta` - `object`, contains all the information about the request
 
 |`ConnectionError`
-|Generated when an error occurs during the reequest, it can be a connection error or a malformed stream of data.
+|Generated when an error occurs during the request, it can be a connection error or a malformed stream of data.
+a|* `name` - `string`
+* `message` - `string`
+* `meta` - `object`, contains all the information about the request
+
+|`RequestAbortedError`
+|Generated if the user calls the `request.abort()` method.
+a|* `name` - `string`
+* `message` - `string`
+* `meta` - `object`, contains all the information about the request
 
 |`NoLivingConnectionsError`
-|Generated in case of all connections present in the connection pool are dead.
+|Given the configuration, the ConnectionPool was not able to find a usable Connection for this request.
+a|* `name` - `string`
+* `message` - `string`
+* `meta` - `object`, contains all the information about the request
 
 |`SerializationError`
 |Generated if the serialization fails.
+a|* `name` - `string`
+* `message` - `string`
+* `data` - `object`, the object to serialize
 
 |`DeserializationError`
 |Generated if the deserialization fails.
+a|* `name` - `string`
+* `message` - `string`
+* `data` - `string`, the string to deserialize
 
 |`ConfigurationError`
 |Generated if there is a malformed configuration or parameter.
+a|* `name` - `string`
+* `message` - `string`
 
 |`ResponseError`
 |Generated when in case of a `4xx` or `5xx` response.
+a|* `name` - `string`
+* `message` - `string`
+* `meta` - `object`, contains all the information about the request
+* `body` - `object`, the response body
+* `statusCode` - `object`, the response headers
+* `headers` - `object`, the response status code
 |===

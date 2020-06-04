@@ -32,11 +32,7 @@ test('Should emit a request event when a request is performed', t => {
             method: 'GET',
             path: '/test/_search',
             body: '',
-            querystring: 'q=foo%3Abar',
-            headers: {
-              'Content-Type': 'application/json',
-              'Content-Length': '0'
-            }
+            querystring: 'q=foo%3Abar'
           },
           options: {},
           id: 1
@@ -84,11 +80,7 @@ test('Should emit a response event in case of a successful response', t => {
             method: 'GET',
             path: '/test/_search',
             body: '',
-            querystring: 'q=foo%3Abar',
-            headers: {
-              'Content-Type': 'application/json',
-              'Content-Length': '0'
-            }
+            querystring: 'q=foo%3Abar'
           },
           options: {},
           id: 1
@@ -134,11 +126,7 @@ test('Should emit a response event with the error set', t => {
             method: 'GET',
             path: '/test/_search',
             body: '',
-            querystring: 'q=foo%3Abar',
-            headers: {
-              'Content-Type': 'application/json',
-              'Content-Length': '0'
-            }
+            querystring: 'q=foo%3Abar'
           },
           options: {
             requestTimeout: 500

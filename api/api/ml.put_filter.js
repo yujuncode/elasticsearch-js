@@ -10,12 +10,6 @@
 function buildMlPutFilter (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [ml.put_filter](undefined) request
-   *
-   * @param {string} filter_id - The ID of the filter to create
-   * @param {object} body - The filter details
-   */
 
   const acceptedQuerystring = [
 
@@ -25,6 +19,11 @@ function buildMlPutFilter (opts) {
 
   }
 
+  /**
+   * Perform a ml.put_filter request
+   * Instantiates a filter.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-put-filter.html
+   */
   return function mlPutFilter (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -57,10 +56,6 @@ function buildMlPutFilter (opts) {
     var { method, body, filterId, filter_id, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = 'PUT'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -68,6 +63,7 @@ function buildMlPutFilter (opts) {
 
     var path = ''
 
+    if (method == null) method = 'PUT'
     path = '/' + '_ml' + '/' + 'filters' + '/' + encodeURIComponent(filter_id || filterId)
 
     // build request object

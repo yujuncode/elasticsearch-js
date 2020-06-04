@@ -10,12 +10,6 @@
 function buildMlPutCalendarJob (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [ml.put_calendar_job](undefined) request
-   *
-   * @param {string} calendar_id - The ID of the calendar to modify
-   * @param {string} job_id - The ID of the job to add to the calendar
-   */
 
   const acceptedQuerystring = [
 
@@ -25,6 +19,11 @@ function buildMlPutCalendarJob (opts) {
 
   }
 
+  /**
+   * Perform a ml.put_calendar_job request
+   * Adds an anomaly detection job to a calendar.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-put-calendar-job.html
+   */
   return function mlPutCalendarJob (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -46,10 +45,6 @@ function buildMlPutCalendarJob (opts) {
       const err = new ConfigurationError('Missing required parameter: job_id or jobId')
       return handleError(err, callback)
     }
-    if (params.body != null) {
-      const err = new ConfigurationError('This API does not require a body')
-      return handleError(err, callback)
-    }
 
     // check required url components
     if ((params['job_id'] != null || params['jobId'] != null) && ((params['calendar_id'] == null && params['calendarId'] == null))) {
@@ -67,10 +62,6 @@ function buildMlPutCalendarJob (opts) {
     var { method, body, calendarId, calendar_id, jobId, job_id, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = 'PUT'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -78,13 +69,14 @@ function buildMlPutCalendarJob (opts) {
 
     var path = ''
 
+    if (method == null) method = 'PUT'
     path = '/' + '_ml' + '/' + 'calendars' + '/' + encodeURIComponent(calendar_id || calendarId) + '/' + 'jobs' + '/' + encodeURIComponent(job_id || jobId)
 
     // build request object
     const request = {
       method,
       path,
-      body: '',
+      body: body || '',
       querystring
     }
 

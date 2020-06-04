@@ -10,12 +10,6 @@
 function buildCcrPutAutoFollowPattern (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [ccr.put_auto_follow_pattern](https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-put-auto-follow-pattern.html) request
-   *
-   * @param {string} name - The name of the auto follow pattern.
-   * @param {object} body - The specification of the auto follow pattern
-   */
 
   const acceptedQuerystring = [
 
@@ -25,6 +19,11 @@ function buildCcrPutAutoFollowPattern (opts) {
 
   }
 
+  /**
+   * Perform a ccr.put_auto_follow_pattern request
+   * Creates a new named collection of auto-follow patterns against a specified remote cluster. Newly created indices on the remote cluster matching any of the specified patterns will be automatically configured as follower indices.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-put-auto-follow-pattern.html
+   */
   return function ccrPutAutoFollowPattern (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -57,10 +56,6 @@ function buildCcrPutAutoFollowPattern (opts) {
     var { method, body, name, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = 'PUT'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -68,6 +63,7 @@ function buildCcrPutAutoFollowPattern (opts) {
 
     var path = ''
 
+    if (method == null) method = 'PUT'
     path = '/' + '_ccr' + '/' + 'auto_follow' + '/' + encodeURIComponent(name)
 
     // build request object

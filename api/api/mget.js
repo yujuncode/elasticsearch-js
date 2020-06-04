@@ -10,21 +10,6 @@
 function buildMget (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [mget](https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-multi-get.html) request
-   *
-   * @param {string} index - The name of the index
-   * @param {string} type - The type of the document
-   * @param {list} stored_fields - A comma-separated list of stored fields to return in the response
-   * @param {string} preference - Specify the node or shard the operation should be performed on (default: random)
-   * @param {boolean} realtime - Specify whether to perform the operation in realtime or search mode
-   * @param {boolean} refresh - Refresh the shard containing the document before performing the operation
-   * @param {string} routing - Specific routing value
-   * @param {list} _source - True or false to return the _source field or not, or a list of fields to return
-   * @param {list} _source_excludes - A list of fields to exclude from the returned _source field
-   * @param {list} _source_includes - A list of fields to extract and return from the _source field
-   * @param {object} body - Document identifiers; can be either `docs` (containing full document information) or `ids` (when index and type is provided in the URL.
-   */
 
   const acceptedQuerystring = [
     'stored_fields',
@@ -54,6 +39,11 @@ function buildMget (opts) {
     filterPath: 'filter_path'
   }
 
+  /**
+   * Perform a mget request
+   * Allows to get multiple documents in one request.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-multi-get.html
+   */
   return function mget (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -72,12 +62,6 @@ function buildMget (opts) {
       return handleError(err, callback)
     }
 
-    // check required url components
-    if (params['type'] != null && (params['index'] == null)) {
-      const err = new ConfigurationError('Missing required parameter of the url: index')
-      return handleError(err, callback)
-    }
-
     // validate headers object
     if (options.headers != null && typeof options.headers !== 'object') {
       const err = new ConfigurationError(`Headers should be an object, instead got: ${typeof options.headers}`)
@@ -85,12 +69,8 @@ function buildMget (opts) {
     }
 
     var warnings = []
-    var { method, body, index, type, ...querystring } = params
+    var { method, body, index, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
-
-    if (method == null) {
-      method = body == null ? 'GET' : 'POST'
-    }
 
     var ignore = options.ignore
     if (typeof ignore === 'number') {
@@ -99,11 +79,11 @@ function buildMget (opts) {
 
     var path = ''
 
-    if ((index) != null && (type) != null) {
-      path = '/' + encodeURIComponent(index) + '/' + encodeURIComponent(type) + '/' + '_mget'
-    } else if ((index) != null) {
+    if ((index) != null) {
+      if (method == null) method = body == null ? 'GET' : 'POST'
       path = '/' + encodeURIComponent(index) + '/' + '_mget'
     } else {
+      if (method == null) method = body == null ? 'GET' : 'POST'
       path = '/' + '_mget'
     }
 

@@ -10,12 +10,6 @@
 function buildMlPutCalendar (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [ml.put_calendar](undefined) request
-   *
-   * @param {string} calendar_id - The ID of the calendar to create
-   * @param {object} body - The calendar details
-   */
 
   const acceptedQuerystring = [
 
@@ -25,6 +19,11 @@ function buildMlPutCalendar (opts) {
 
   }
 
+  /**
+   * Perform a ml.put_calendar request
+   * Instantiates a calendar.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-put-calendar.html
+   */
   return function mlPutCalendar (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -53,10 +52,6 @@ function buildMlPutCalendar (opts) {
     var { method, body, calendarId, calendar_id, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = 'PUT'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -64,6 +59,7 @@ function buildMlPutCalendar (opts) {
 
     var path = ''
 
+    if (method == null) method = 'PUT'
     path = '/' + '_ml' + '/' + 'calendars' + '/' + encodeURIComponent(calendar_id || calendarId)
 
     // build request object

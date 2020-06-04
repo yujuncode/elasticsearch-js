@@ -10,12 +10,6 @@
 function buildIlmMoveToStep (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [ilm.move_to_step](https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-move-to-step.html) request
-   *
-   * @param {string} index - The name of the index whose lifecycle step is to change
-   * @param {object} body - The new lifecycle step to move to
-   */
 
   const acceptedQuerystring = [
 
@@ -25,6 +19,11 @@ function buildIlmMoveToStep (opts) {
 
   }
 
+  /**
+   * Perform a ilm.move_to_step request
+   * Manually moves an index into the specified step and executes that step.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-move-to-step.html
+   */
   return function ilmMoveToStep (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -37,6 +36,12 @@ function buildIlmMoveToStep (opts) {
       options = {}
     }
 
+    // check required parameters
+    if (params['index'] == null) {
+      const err = new ConfigurationError('Missing required parameter: index')
+      return handleError(err, callback)
+    }
+
     // validate headers object
     if (options.headers != null && typeof options.headers !== 'object') {
       const err = new ConfigurationError(`Headers should be an object, instead got: ${typeof options.headers}`)
@@ -47,10 +52,6 @@ function buildIlmMoveToStep (opts) {
     var { method, body, index, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = 'POST'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -58,6 +59,7 @@ function buildIlmMoveToStep (opts) {
 
     var path = ''
 
+    if (method == null) method = 'POST'
     path = '/' + '_ilm' + '/' + 'move' + '/' + encodeURIComponent(index)
 
     // build request object

@@ -10,11 +10,6 @@
 function buildSecurityInvalidateToken (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [security.invalidate_token](https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-invalidate-token.html) request
-   *
-   * @param {object} body - The token to invalidate
-   */
 
   const acceptedQuerystring = [
 
@@ -24,6 +19,11 @@ function buildSecurityInvalidateToken (opts) {
 
   }
 
+  /**
+   * Perform a security.invalidate_token request
+   * Invalidates one or more access tokens or refresh tokens.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-invalidate-token.html
+   */
   return function securityInvalidateToken (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -52,10 +52,6 @@ function buildSecurityInvalidateToken (opts) {
     var { method, body, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = 'DELETE'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -63,6 +59,7 @@ function buildSecurityInvalidateToken (opts) {
 
     var path = ''
 
+    if (method == null) method = 'DELETE'
     path = '/' + '_security' + '/' + 'oauth2' + '/' + 'token'
 
     // build request object

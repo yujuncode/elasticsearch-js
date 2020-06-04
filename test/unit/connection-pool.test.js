@@ -74,6 +74,14 @@ test('API', t => {
     }, 10)
   })
 
+  t.test('markDead should ignore connections that no longer exists', t => {
+    const pool = new ConnectionPool({ Connection, sniffEnabled: true })
+    pool.addConnection('http://localhost:9200/')
+    pool.markDead({ id: 'foo-bar' })
+    t.deepEqual(pool.dead, [])
+    t.end()
+  })
+
   t.test('markAlive', t => {
     const pool = new ConnectionPool({ Connection, sniffEnabled: true })
     const href = 'http://localhost:9200/'
@@ -247,6 +255,20 @@ test('API', t => {
         return true
       }
       pool.getConnection({ filter })
+    })
+
+    t.test('If all connections are marked as dead, getConnection should return a dead connection', t => {
+      const pool = new ConnectionPool({ Connection })
+      const href1 = 'http://localhost:9200/'
+      const href2 = 'http://localhost:9200/other'
+      const conn1 = pool.addConnection(href1)
+      const conn2 = pool.addConnection(href2)
+      pool.markDead(conn1)
+      pool.markDead(conn2)
+      const conn = pool.getConnection()
+      t.ok(conn instanceof Connection)
+      t.is(conn.status, 'dead')
+      t.end()
     })
 
     t.end()
@@ -471,6 +493,45 @@ test('API', t => {
 
       t.strictEqual(pool.nodesToHost(nodes, 'https:')[0].url.protocol, 'https:')
       t.strictEqual(pool.nodesToHost(nodes, 'http:')[1].url.protocol, 'http:')
+      t.end()
+    })
+
+    t.test('Should map roles', t => {
+      const pool = new ConnectionPool({ Connection })
+      const nodes = {
+        a1: {
+          http: {
+            publish_address: 'example.com:9200'
+          },
+          roles: ['master', 'data', 'ingest', 'ml']
+        },
+        a2: {
+          http: {
+            publish_address: 'example.com:9201'
+          },
+          roles: []
+        }
+      }
+      t.same(pool.nodesToHost(nodes, 'http:'), [{
+        url: new URL('http://example.com:9200'),
+        id: 'a1',
+        roles: {
+          master: true,
+          data: true,
+          ingest: true,
+          ml: true
+        }
+      }, {
+        url: new URL('http://example.com:9201'),
+        id: 'a2',
+        roles: {
+          master: false,
+          data: false,
+          ingest: false,
+          ml: false
+        }
+      }])
+
       t.end()
     })
 
@@ -719,30 +780,6 @@ test('Node filter', t => {
       }
     })
     t.strictEqual(pool.getConnection({ filter: defaultNodeFilter }), null)
-  })
-
-  t.end()
-})
-
-test('Single node behavior', t => {
-  t.test('sniffing disabled (markDead and markAlive should be noop)', t => {
-    t.plan(4)
-    const pool = new ConnectionPool({ Connection, sniffEnabled: false })
-    const conn = pool.addConnection('http://localhost:9200/')
-    t.true(pool.markDead(conn) instanceof ConnectionPool)
-    t.strictEqual(pool.dead.length, 0)
-    t.true(pool.markAlive(conn) instanceof ConnectionPool)
-    t.strictEqual(pool.dead.length, 0)
-  })
-
-  t.test('sniffing enabled (markDead and markAlive should work)', t => {
-    t.plan(4)
-    const pool = new ConnectionPool({ Connection, sniffEnabled: true })
-    const conn = pool.addConnection('http://localhost:9200/')
-    t.true(pool.markDead(conn) instanceof ConnectionPool)
-    t.strictEqual(pool.dead.length, 1)
-    t.true(pool.markAlive(conn) instanceof ConnectionPool)
-    t.strictEqual(pool.dead.length, 0)
   })
 
   t.end()

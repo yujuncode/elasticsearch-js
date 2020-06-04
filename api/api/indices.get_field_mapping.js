@@ -10,22 +10,8 @@
 function buildIndicesGetFieldMapping (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [indices.get_field_mapping](https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-field-mapping.html) request
-   *
-   * @param {list} index - A comma-separated list of index names
-   * @param {list} type - A comma-separated list of document types
-   * @param {list} fields - A comma-separated list of fields
-   * @param {boolean} include_type_name - Whether a type should be returned in the body of the mappings.
-   * @param {boolean} include_defaults - Whether the default mapping values should be returned as well
-   * @param {boolean} ignore_unavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
-   * @param {boolean} allow_no_indices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
-   * @param {enum} expand_wildcards - Whether to expand wildcard expression to concrete indices that are open, closed or both.
-   * @param {boolean} local - Return local information, do not retrieve the state from master node (default: false)
-   */
 
   const acceptedQuerystring = [
-    'include_type_name',
     'include_defaults',
     'ignore_unavailable',
     'allow_no_indices',
@@ -39,7 +25,6 @@ function buildIndicesGetFieldMapping (opts) {
   ]
 
   const snakeCase = {
-    includeTypeName: 'include_type_name',
     includeDefaults: 'include_defaults',
     ignoreUnavailable: 'ignore_unavailable',
     allowNoIndices: 'allow_no_indices',
@@ -48,6 +33,11 @@ function buildIndicesGetFieldMapping (opts) {
     filterPath: 'filter_path'
   }
 
+  /**
+   * Perform a indices.get_field_mapping request
+   * Returns mapping for one or more fields.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-field-mapping.html
+   */
   return function indicesGetFieldMapping (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -65,10 +55,6 @@ function buildIndicesGetFieldMapping (opts) {
       const err = new ConfigurationError('Missing required parameter: fields')
       return handleError(err, callback)
     }
-    if (params.body != null) {
-      const err = new ConfigurationError('This API does not require a body')
-      return handleError(err, callback)
-    }
 
     // validate headers object
     if (options.headers != null && typeof options.headers !== 'object') {
@@ -77,12 +63,8 @@ function buildIndicesGetFieldMapping (opts) {
     }
 
     var warnings = []
-    var { method, body, index, type, fields, ...querystring } = params
+    var { method, body, fields, index, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
-
-    if (method == null) {
-      method = 'GET'
-    }
 
     var ignore = options.ignore
     if (typeof ignore === 'number') {
@@ -91,13 +73,11 @@ function buildIndicesGetFieldMapping (opts) {
 
     var path = ''
 
-    if ((index) != null && (type) != null && (fields) != null) {
-      path = '/' + encodeURIComponent(index) + '/' + '_mapping' + '/' + encodeURIComponent(type) + '/' + 'field' + '/' + encodeURIComponent(fields)
-    } else if ((index) != null && (fields) != null) {
+    if ((index) != null && (fields) != null) {
+      if (method == null) method = 'GET'
       path = '/' + encodeURIComponent(index) + '/' + '_mapping' + '/' + 'field' + '/' + encodeURIComponent(fields)
-    } else if ((type) != null && (fields) != null) {
-      path = '/' + '_mapping' + '/' + encodeURIComponent(type) + '/' + 'field' + '/' + encodeURIComponent(fields)
     } else {
+      if (method == null) method = 'GET'
       path = '/' + '_mapping' + '/' + 'field' + '/' + encodeURIComponent(fields)
     }
 

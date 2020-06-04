@@ -10,11 +10,6 @@
 function buildMlValidateDetector (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [ml.validate_detector](undefined) request
-   *
-   * @param {object} body - The detector
-   */
 
   const acceptedQuerystring = [
 
@@ -24,6 +19,11 @@ function buildMlValidateDetector (opts) {
 
   }
 
+  /**
+   * Perform a ml.validate_detector request
+   * Validates an anomaly detection detector.
+   * https://www.elastic.co/guide/en/machine-learning/current/ml-jobs.html
+   */
   return function mlValidateDetector (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -52,10 +52,6 @@ function buildMlValidateDetector (opts) {
     var { method, body, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = 'POST'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -63,6 +59,7 @@ function buildMlValidateDetector (opts) {
 
     var path = ''
 
+    if (method == null) method = 'POST'
     path = '/' + '_ml' + '/' + 'anomaly_detectors' + '/' + '_validate' + '/' + 'detector'
 
     // build request object

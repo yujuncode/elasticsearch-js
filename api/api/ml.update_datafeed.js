@@ -10,21 +10,26 @@
 function buildMlUpdateDatafeed (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [ml.update_datafeed](http://www.elastic.co/guide/en/elasticsearch/reference/current/ml-update-datafeed.html) request
-   *
-   * @param {string} datafeed_id - The ID of the datafeed to update
-   * @param {object} body - The datafeed update settings
-   */
 
   const acceptedQuerystring = [
-
+    'ignore_unavailable',
+    'allow_no_indices',
+    'ignore_throttled',
+    'expand_wildcards'
   ]
 
   const snakeCase = {
-
+    ignoreUnavailable: 'ignore_unavailable',
+    allowNoIndices: 'allow_no_indices',
+    ignoreThrottled: 'ignore_throttled',
+    expandWildcards: 'expand_wildcards'
   }
 
+  /**
+   * Perform a ml.update_datafeed request
+   * Updates certain properties of a datafeed.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-update-datafeed.html
+   */
   return function mlUpdateDatafeed (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -57,10 +62,6 @@ function buildMlUpdateDatafeed (opts) {
     var { method, body, datafeedId, datafeed_id, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = 'POST'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -68,6 +69,7 @@ function buildMlUpdateDatafeed (opts) {
 
     var path = ''
 
+    if (method == null) method = 'POST'
     path = '/' + '_ml' + '/' + 'datafeeds' + '/' + encodeURIComponent(datafeed_id || datafeedId) + '/' + '_update'
 
     // build request object

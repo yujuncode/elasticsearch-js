@@ -10,10 +10,6 @@
 function buildMlInfo (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [ml.info](undefined) request
-   *
-   */
 
   const acceptedQuerystring = [
 
@@ -23,6 +19,11 @@ function buildMlInfo (opts) {
 
   }
 
+  /**
+   * Perform a ml.info request
+   * Returns defaults and limits used by machine learning.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/get-ml-info.html
+   */
   return function mlInfo (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -45,10 +46,6 @@ function buildMlInfo (opts) {
     var { method, body, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = 'GET'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -56,6 +53,7 @@ function buildMlInfo (opts) {
 
     var path = ''
 
+    if (method == null) method = 'GET'
     path = '/' + '_ml' + '/' + 'info'
 
     // build request object

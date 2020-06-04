@@ -10,12 +10,6 @@
 function buildMlUpdateJob (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [ml.update_job](http://www.elastic.co/guide/en/elasticsearch/reference/current/ml-update-job.html) request
-   *
-   * @param {string} job_id - The ID of the job to create
-   * @param {object} body - The job update settings
-   */
 
   const acceptedQuerystring = [
 
@@ -25,6 +19,11 @@ function buildMlUpdateJob (opts) {
 
   }
 
+  /**
+   * Perform a ml.update_job request
+   * Updates certain properties of an anomaly detection job.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-update-job.html
+   */
   return function mlUpdateJob (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -57,10 +56,6 @@ function buildMlUpdateJob (opts) {
     var { method, body, jobId, job_id, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = 'POST'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -68,6 +63,7 @@ function buildMlUpdateJob (opts) {
 
     var path = ''
 
+    if (method == null) method = 'POST'
     path = '/' + '_ml' + '/' + 'anomaly_detectors' + '/' + encodeURIComponent(job_id || jobId) + '/' + '_update'
 
     // build request object

@@ -2,6 +2,8 @@
 // Elasticsearch B.V licenses this file to you under the Apache 2.0 License.
 // See the LICENSE file in the project root for more information
 
+import { RequestBody, RequestNDBody } from '../lib/Transport'
+
 export interface Generic {
   method?: string;
   ignore?: number | number[];
@@ -12,7 +14,7 @@ export interface Generic {
   source?: string;
 }
 
-export interface Bulk<T = any> extends Generic {
+export interface Bulk<T = RequestNDBody> extends Generic {
   index?: string;
   type?: string;
   _source_exclude?: string | string[];
@@ -32,11 +34,11 @@ export interface CatAliases extends Generic {
   name?: string | string[];
   format?: string;
   local?: boolean;
-  master_timeout?: string;
   h?: string | string[];
   help?: boolean;
   s?: string | string[];
   v?: boolean;
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
 }
 
 export interface CatAllocation extends Generic {
@@ -54,8 +56,6 @@ export interface CatAllocation extends Generic {
 export interface CatCount extends Generic {
   index?: string | string[];
   format?: string;
-  local?: boolean;
-  master_timeout?: string;
   h?: string | string[];
   help?: boolean;
   s?: string | string[];
@@ -66,8 +66,6 @@ export interface CatFielddata extends Generic {
   fields?: string | string[];
   format?: string;
   bytes?: 'b' | 'k' | 'kb' | 'm' | 'mb' | 'g' | 'gb' | 't' | 'tb' | 'p' | 'pb';
-  local?: boolean;
-  master_timeout?: string;
   h?: string | string[];
   help?: boolean;
   s?: string | string[];
@@ -76,11 +74,10 @@ export interface CatFielddata extends Generic {
 
 export interface CatHealth extends Generic {
   format?: string;
-  local?: boolean;
-  master_timeout?: string;
   h?: string | string[];
   help?: boolean;
   s?: string | string[];
+  time?: 'd' | 'h' | 'm' | 's' | 'ms' | 'micros' | 'nanos';
   ts?: boolean;
   v?: boolean;
 }
@@ -93,7 +90,7 @@ export interface CatHelp extends Generic {
 export interface CatIndices extends Generic {
   index?: string | string[];
   format?: string;
-  bytes?: 'b' | 'k' | 'm' | 'g';
+  bytes?: 'b' | 'k' | 'kb' | 'm' | 'mb' | 'g' | 'gb' | 't' | 'tb' | 'p' | 'pb';
   local?: boolean;
   master_timeout?: string;
   h?: string | string[];
@@ -101,8 +98,10 @@ export interface CatIndices extends Generic {
   help?: boolean;
   pri?: boolean;
   s?: string | string[];
+  time?: 'd' | 'h' | 'm' | 's' | 'ms' | 'micros' | 'nanos';
   v?: boolean;
   include_unloaded_segments?: boolean;
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
 }
 
 export interface CatMaster extends Generic {
@@ -126,13 +125,14 @@ export interface CatNodeattrs extends Generic {
 }
 
 export interface CatNodes extends Generic {
+  bytes?: 'b' | 'k' | 'kb' | 'm' | 'mb' | 'g' | 'gb' | 't' | 'tb' | 'p' | 'pb';
   format?: string;
   full_id?: boolean;
-  local?: boolean;
   master_timeout?: string;
   h?: string | string[];
   help?: boolean;
   s?: string | string[];
+  time?: 'd' | 'h' | 'm' | 's' | 'ms' | 'micros' | 'nanos';
   v?: boolean;
 }
 
@@ -143,6 +143,7 @@ export interface CatPendingTasks extends Generic {
   h?: string | string[];
   help?: boolean;
   s?: string | string[];
+  time?: 'd' | 'h' | 'm' | 's' | 'ms' | 'micros' | 'nanos';
   v?: boolean;
 }
 
@@ -159,11 +160,13 @@ export interface CatPlugins extends Generic {
 export interface CatRecovery extends Generic {
   index?: string | string[];
   format?: string;
+  active_only?: boolean;
   bytes?: 'b' | 'k' | 'kb' | 'm' | 'mb' | 'g' | 'gb' | 't' | 'tb' | 'p' | 'pb';
-  master_timeout?: string;
+  detailed?: boolean;
   h?: string | string[];
   help?: boolean;
   s?: string | string[];
+  time?: 'd' | 'h' | 'm' | 's' | 'ms' | 'micros' | 'nanos';
   v?: boolean;
 }
 
@@ -196,6 +199,7 @@ export interface CatShards extends Generic {
   h?: string | string[];
   help?: boolean;
   s?: string | string[];
+  time?: 'd' | 'h' | 'm' | 's' | 'ms' | 'micros' | 'nanos';
   v?: boolean;
 }
 
@@ -207,6 +211,7 @@ export interface CatSnapshots extends Generic {
   h?: string | string[];
   help?: boolean;
   s?: string | string[];
+  time?: 'd' | 'h' | 'm' | 's' | 'ms' | 'micros' | 'nanos';
   v?: boolean;
 }
 
@@ -219,6 +224,7 @@ export interface CatTasks extends Generic {
   h?: string | string[];
   help?: boolean;
   s?: string | string[];
+  time?: 'd' | 'h' | 'm' | 's' | 'ms' | 'micros' | 'nanos';
   v?: boolean;
 }
 
@@ -236,7 +242,7 @@ export interface CatTemplates extends Generic {
 export interface CatThreadPool extends Generic {
   thread_pool_patterns?: string | string[];
   format?: string;
-  size?: '' | 'k' | 'm' | 'g' | 't' | 'p';
+  time?: 'd' | 'h' | 'm' | 's' | 'ms' | 'micros' | 'nanos';
   local?: boolean;
   master_timeout?: string;
   h?: string | string[];
@@ -245,15 +251,37 @@ export interface CatThreadPool extends Generic {
   v?: boolean;
 }
 
-export interface ClearScroll<T = any> extends Generic {
+export interface ClearScroll<T = RequestBody> extends Generic {
   scroll_id?: string | string[];
   body?: T;
 }
 
-export interface ClusterAllocationExplain<T = any> extends Generic {
+export interface ClusterAllocationExplain<T = RequestBody> extends Generic {
   include_yes_decisions?: boolean;
   include_disk_info?: boolean;
   body?: T;
+}
+
+export interface ClusterDeleteComponentTemplate extends Generic {
+  name: string;
+  timeout?: string;
+  master_timeout?: string;
+}
+
+export interface ClusterDeleteVotingConfigExclusions extends Generic {
+  wait_for_removal?: boolean;
+}
+
+export interface ClusterExistsComponentTemplate extends Generic {
+  name: string;
+  master_timeout?: string;
+  local?: boolean;
+}
+
+export interface ClusterGetComponentTemplate extends Generic {
+  name?: string | string[];
+  master_timeout?: string;
+  local?: boolean;
 }
 
 export interface ClusterGetSettings extends Generic {
@@ -265,7 +293,7 @@ export interface ClusterGetSettings extends Generic {
 
 export interface ClusterHealth extends Generic {
   index?: string | string[];
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   level?: 'cluster' | 'indices' | 'shards';
   local?: boolean;
   master_timeout?: string;
@@ -283,7 +311,21 @@ export interface ClusterPendingTasks extends Generic {
   master_timeout?: string;
 }
 
-export interface ClusterPutSettings<T = any> extends Generic {
+export interface ClusterPostVotingConfigExclusions extends Generic {
+  node_ids?: string;
+  node_names?: string;
+  timeout?: string;
+}
+
+export interface ClusterPutComponentTemplate<T = RequestBody> extends Generic {
+  name: string;
+  create?: boolean;
+  timeout?: string;
+  master_timeout?: string;
+  body: T;
+}
+
+export interface ClusterPutSettings<T = RequestBody> extends Generic {
   flat_settings?: boolean;
   master_timeout?: string;
   timeout?: string;
@@ -293,7 +335,7 @@ export interface ClusterPutSettings<T = any> extends Generic {
 export interface ClusterRemoteInfo extends Generic {
 }
 
-export interface ClusterReroute<T = any> extends Generic {
+export interface ClusterReroute<T = RequestBody> extends Generic {
   dry_run?: boolean;
   explain?: boolean;
   retry_failed?: boolean;
@@ -313,7 +355,7 @@ export interface ClusterState extends Generic {
   wait_for_timeout?: string;
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
 }
 
 export interface ClusterStats extends Generic {
@@ -322,13 +364,12 @@ export interface ClusterStats extends Generic {
   timeout?: string;
 }
 
-export interface Count<T = any> extends Generic {
+export interface Count<T = RequestBody> extends Generic {
   index?: string | string[];
-  type?: string | string[];
   ignore_unavailable?: boolean;
   ignore_throttled?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   min_score?: number;
   preference?: string;
   routing?: string | string[];
@@ -342,7 +383,7 @@ export interface Count<T = any> extends Generic {
   body?: T;
 }
 
-export interface Create<T = any> extends Generic {
+export interface Create<T = RequestBody> extends Generic {
   id: string;
   index: string;
   type?: string;
@@ -351,7 +392,7 @@ export interface Create<T = any> extends Generic {
   routing?: string;
   timeout?: string;
   version?: number;
-  version_type?: 'internal' | 'external' | 'external_gte' | 'force';
+  version_type?: 'internal' | 'external' | 'external_gte';
   pipeline?: string;
   body: T;
 }
@@ -367,10 +408,10 @@ export interface Delete extends Generic {
   if_seq_no?: number;
   if_primary_term?: number;
   version?: number;
-  version_type?: 'internal' | 'external' | 'external_gte' | 'force';
+  version_type?: 'internal' | 'external' | 'external_gte';
 }
 
-export interface DeleteByQuery<T = any> extends Generic {
+export interface DeleteByQuery<T = RequestBody> extends Generic {
   index: string | string[];
   _source_exclude?: string | string[];
   _source_include?: string | string[];
@@ -382,7 +423,7 @@ export interface DeleteByQuery<T = any> extends Generic {
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
   conflicts?: 'abort' | 'proceed';
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   lenient?: boolean;
   preference?: string;
   q?: string;
@@ -405,7 +446,7 @@ export interface DeleteByQuery<T = any> extends Generic {
   scroll_size?: number;
   wait_for_completion?: boolean;
   requests_per_second?: number;
-  slices?: number;
+  slices?: number|string;
   body: T;
 }
 
@@ -423,7 +464,6 @@ export interface DeleteScript extends Generic {
 export interface Exists extends Generic {
   id: string;
   index: string;
-  type?: string;
   _source_exclude?: string | string[];
   _source_include?: string | string[];
   stored_fields?: string | string[];
@@ -435,7 +475,7 @@ export interface Exists extends Generic {
   _source_excludes?: string | string[];
   _source_includes?: string | string[];
   version?: number;
-  version_type?: 'internal' | 'external' | 'external_gte' | 'force';
+  version_type?: 'internal' | 'external' | 'external_gte';
 }
 
 export interface ExistsSource extends Generic {
@@ -452,13 +492,12 @@ export interface ExistsSource extends Generic {
   _source_excludes?: string | string[];
   _source_includes?: string | string[];
   version?: number;
-  version_type?: 'internal' | 'external' | 'external_gte' | 'force';
+  version_type?: 'internal' | 'external' | 'external_gte';
 }
 
-export interface Explain<T = any> extends Generic {
+export interface Explain<T = RequestBody> extends Generic {
   id: string;
   index: string;
-  type?: string;
   _source_exclude?: string | string[];
   _source_include?: string | string[];
   analyze_wildcard?: boolean;
@@ -481,14 +520,13 @@ export interface FieldCaps extends Generic {
   fields?: string | string[];
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   include_unmapped?: boolean;
 }
 
 export interface Get extends Generic {
   id: string;
   index: string;
-  type?: string;
   _source_exclude?: string | string[];
   _source_include?: string | string[];
   stored_fields?: string | string[];
@@ -500,7 +538,7 @@ export interface Get extends Generic {
   _source_excludes?: string | string[];
   _source_includes?: string | string[];
   version?: number;
-  version_type?: 'internal' | 'external' | 'external_gte' | 'force';
+  version_type?: 'internal' | 'external' | 'external_gte';
 }
 
 export interface GetScript extends Generic {
@@ -508,10 +546,15 @@ export interface GetScript extends Generic {
   master_timeout?: string;
 }
 
+export interface GetScriptContext extends Generic {
+}
+
+export interface GetScriptLanguages extends Generic {
+}
+
 export interface GetSource extends Generic {
   id: string;
   index: string;
-  type?: string;
   _source_exclude?: string | string[];
   _source_include?: string | string[];
   preference?: string;
@@ -522,27 +565,26 @@ export interface GetSource extends Generic {
   _source_excludes?: string | string[];
   _source_includes?: string | string[];
   version?: number;
-  version_type?: 'internal' | 'external' | 'external_gte' | 'force';
+  version_type?: 'internal' | 'external' | 'external_gte';
 }
 
-export interface Index<T = any> extends Generic {
+export interface Index<T = RequestBody> extends Generic {
   id?: string;
   index: string;
-  type?: string;
   wait_for_active_shards?: string;
   op_type?: 'index' | 'create';
   refresh?: 'true' | 'false' | 'wait_for';
   routing?: string;
   timeout?: string;
   version?: number;
-  version_type?: 'internal' | 'external' | 'external_gte' | 'force';
+  version_type?: 'internal' | 'external' | 'external_gte';
   if_seq_no?: number;
   if_primary_term?: number;
   pipeline?: string;
   body: T;
 }
 
-export interface IndicesAnalyze<T = any> extends Generic {
+export interface IndicesAnalyze<T = RequestBody> extends Generic {
   index?: string;
   body?: T;
 }
@@ -554,11 +596,11 @@ export interface IndicesClearCache extends Generic {
   query?: boolean;
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   request?: boolean;
 }
 
-export interface IndicesClone<T = any> extends Generic {
+export interface IndicesClone<T = RequestBody> extends Generic {
   index: string;
   target: string;
   timeout?: string;
@@ -573,16 +615,20 @@ export interface IndicesClose extends Generic {
   master_timeout?: string;
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   wait_for_active_shards?: string;
 }
 
-export interface IndicesCreate<T = any> extends Generic {
+export interface IndicesCreate<T = RequestBody> extends Generic {
   index: string;
-  include_type_name?: boolean;
   wait_for_active_shards?: string;
   timeout?: string;
   master_timeout?: string;
+  body?: T;
+}
+
+export interface IndicesCreateDataStream<T = RequestBody> extends Generic {
+  name: string;
   body?: T;
 }
 
@@ -592,12 +638,22 @@ export interface IndicesDelete extends Generic {
   master_timeout?: string;
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
 }
 
 export interface IndicesDeleteAlias extends Generic {
   index: string | string[];
   name: string | string[];
+  timeout?: string;
+  master_timeout?: string;
+}
+
+export interface IndicesDeleteDataStream extends Generic {
+  name: string;
+}
+
+export interface IndicesDeleteIndexTemplate extends Generic {
+  name: string;
   timeout?: string;
   master_timeout?: string;
 }
@@ -613,17 +669,24 @@ export interface IndicesExists extends Generic {
   local?: boolean;
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   flat_settings?: boolean;
   include_defaults?: boolean;
 }
 
 export interface IndicesExistsAlias extends Generic {
-  index?: string | string[];
   name: string | string[];
+  index?: string | string[];
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
+  local?: boolean;
+}
+
+export interface IndicesExistsIndexTemplate extends Generic {
+  name: string;
+  flat_settings?: boolean;
+  master_timeout?: string;
   local?: boolean;
 }
 
@@ -639,7 +702,7 @@ export interface IndicesExistsType extends Generic {
   type: string | string[];
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   local?: boolean;
 }
 
@@ -649,14 +712,7 @@ export interface IndicesFlush extends Generic {
   wait_if_ongoing?: boolean;
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
-}
-
-export interface IndicesFlushSynced extends Generic {
-  index?: string | string[];
-  ignore_unavailable?: boolean;
-  allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
 }
 
 export interface IndicesForcemerge extends Generic {
@@ -664,51 +720,57 @@ export interface IndicesForcemerge extends Generic {
   flush?: boolean;
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   max_num_segments?: number;
   only_expunge_deletes?: boolean;
 }
 
 export interface IndicesGet extends Generic {
   index: string | string[];
-  include_type_name?: boolean;
   local?: boolean;
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   flat_settings?: boolean;
   include_defaults?: boolean;
   master_timeout?: string;
 }
 
 export interface IndicesGetAlias extends Generic {
-  index?: string | string[];
   name?: string | string[];
+  index?: string | string[];
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   local?: boolean;
 }
 
+export interface IndicesGetDataStream extends Generic {
+  name?: string;
+}
+
 export interface IndicesGetFieldMapping extends Generic {
-  index?: string | string[];
-  type?: string | string[];
   fields: string | string[];
-  include_type_name?: boolean;
+  index?: string | string[];
   include_defaults?: boolean;
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
+  local?: boolean;
+}
+
+export interface IndicesGetIndexTemplate extends Generic {
+  name?: string | string[];
+  flat_settings?: boolean;
+  master_timeout?: string;
   local?: boolean;
 }
 
 export interface IndicesGetMapping extends Generic {
   index?: string | string[];
-  type?: string | string[];
-  include_type_name?: boolean;
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   master_timeout?: string;
   local?: boolean;
 }
@@ -719,7 +781,7 @@ export interface IndicesGetSettings extends Generic {
   master_timeout?: string;
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   flat_settings?: boolean;
   local?: boolean;
   include_defaults?: boolean;
@@ -727,7 +789,6 @@ export interface IndicesGetSettings extends Generic {
 
 export interface IndicesGetTemplate extends Generic {
   name?: string | string[];
-  include_type_name?: boolean;
   flat_settings?: boolean;
   master_timeout?: string;
   local?: boolean;
@@ -737,7 +798,7 @@ export interface IndicesGetUpgrade extends Generic {
   index?: string | string[];
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
 }
 
 export interface IndicesOpen extends Generic {
@@ -746,11 +807,11 @@ export interface IndicesOpen extends Generic {
   master_timeout?: string;
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   wait_for_active_shards?: string;
 }
 
-export interface IndicesPutAlias<T = any> extends Generic {
+export interface IndicesPutAlias<T = RequestBody> extends Generic {
   index: string | string[];
   name: string;
   timeout?: string;
@@ -758,38 +819,41 @@ export interface IndicesPutAlias<T = any> extends Generic {
   body?: T;
 }
 
-export interface IndicesPutMapping<T = any> extends Generic {
-  index?: string | string[];
-  type?: string;
-  include_type_name?: boolean;
+export interface IndicesPutIndexTemplate<T = RequestBody> extends Generic {
+  name: string;
+  create?: boolean;
+  cause?: string;
+  master_timeout?: string;
+  body: T;
+}
+
+export interface IndicesPutMapping<T = RequestBody> extends Generic {
+  index: string | string[];
   timeout?: string;
   master_timeout?: string;
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   body: T;
 }
 
-export interface IndicesPutSettings<T = any> extends Generic {
+export interface IndicesPutSettings<T = RequestBody> extends Generic {
   index?: string | string[];
   master_timeout?: string;
   timeout?: string;
   preserve_existing?: boolean;
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   flat_settings?: boolean;
   body: T;
 }
 
-export interface IndicesPutTemplate<T = any> extends Generic {
+export interface IndicesPutTemplate<T = RequestBody> extends Generic {
   name: string;
-  include_type_name?: boolean;
   order?: number;
   create?: boolean;
-  timeout?: string;
   master_timeout?: string;
-  flat_settings?: boolean;
   body: T;
 }
 
@@ -803,13 +867,12 @@ export interface IndicesRefresh extends Generic {
   index?: string | string[];
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
 }
 
-export interface IndicesRollover<T = any> extends Generic {
+export interface IndicesRollover<T = RequestBody> extends Generic {
   alias: string;
   new_index?: string;
-  include_type_name?: boolean;
   timeout?: string;
   dry_run?: boolean;
   master_timeout?: string;
@@ -821,7 +884,7 @@ export interface IndicesSegments extends Generic {
   index?: string | string[];
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   verbose?: boolean;
 }
 
@@ -830,10 +893,10 @@ export interface IndicesShardStores extends Generic {
   status?: string | string[];
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
 }
 
-export interface IndicesShrink<T = any> extends Generic {
+export interface IndicesShrink<T = RequestBody> extends Generic {
   index: string;
   target: string;
   timeout?: string;
@@ -842,7 +905,23 @@ export interface IndicesShrink<T = any> extends Generic {
   body?: T;
 }
 
-export interface IndicesSplit<T = any> extends Generic {
+export interface IndicesSimulateIndexTemplate<T = RequestBody> extends Generic {
+  name: string;
+  create?: boolean;
+  cause?: string;
+  master_timeout?: string;
+  body?: T;
+}
+
+export interface IndicesSimulateTemplate<T = RequestBody> extends Generic {
+  name?: string;
+  create?: boolean;
+  cause?: string;
+  master_timeout?: string;
+  body?: T;
+}
+
+export interface IndicesSplit<T = RequestBody> extends Generic {
   index: string;
   target: string;
   timeout?: string;
@@ -852,8 +931,8 @@ export interface IndicesSplit<T = any> extends Generic {
 }
 
 export interface IndicesStats extends Generic {
-  index?: string | string[];
   metric?: string | string[];
+  index?: string | string[];
   completion_fields?: string | string[];
   fielddata_fields?: string | string[];
   fields?: string | string[];
@@ -862,11 +941,11 @@ export interface IndicesStats extends Generic {
   types?: string | string[];
   include_segment_file_sizes?: boolean;
   include_unloaded_segments?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   forbid_closed_indices?: boolean;
 }
 
-export interface IndicesUpdateAliases<T = any> extends Generic {
+export interface IndicesUpdateAliases<T = RequestBody> extends Generic {
   timeout?: string;
   master_timeout?: string;
   body: T;
@@ -875,19 +954,19 @@ export interface IndicesUpdateAliases<T = any> extends Generic {
 export interface IndicesUpgrade extends Generic {
   index?: string | string[];
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   ignore_unavailable?: boolean;
   wait_for_completion?: boolean;
   only_ancient_segments?: boolean;
 }
 
-export interface IndicesValidateQuery<T = any> extends Generic {
+export interface IndicesValidateQuery<T = RequestBody> extends Generic {
   index?: string | string[];
   type?: string | string[];
   explain?: boolean;
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   q?: string;
   analyzer?: string;
   analyze_wildcard?: boolean;
@@ -916,22 +995,21 @@ export interface IngestGetPipeline extends Generic {
 export interface IngestProcessorGrok extends Generic {
 }
 
-export interface IngestPutPipeline<T = any> extends Generic {
+export interface IngestPutPipeline<T = RequestBody> extends Generic {
   id: string;
   master_timeout?: string;
   timeout?: string;
   body: T;
 }
 
-export interface IngestSimulate<T = any> extends Generic {
+export interface IngestSimulate<T = RequestBody> extends Generic {
   id?: string;
   verbose?: boolean;
   body: T;
 }
 
-export interface Mget<T = any> extends Generic {
+export interface Mget<T = RequestBody> extends Generic {
   index?: string;
-  type?: string;
   _source_exclude?: string | string[];
   _source_include?: string | string[];
   stored_fields?: string | string[];
@@ -945,7 +1023,7 @@ export interface Mget<T = any> extends Generic {
   body: T;
 }
 
-export interface Msearch<T = any> extends Generic {
+export interface Msearch<T = RequestNDBody> extends Generic {
   index?: string | string[];
   search_type?: 'query_then_fetch' | 'query_and_fetch' | 'dfs_query_then_fetch' | 'dfs_query_and_fetch';
   max_concurrent_searches?: number;
@@ -957,7 +1035,7 @@ export interface Msearch<T = any> extends Generic {
   body: T;
 }
 
-export interface MsearchTemplate<T = any> extends Generic {
+export interface MsearchTemplate<T = RequestNDBody> extends Generic {
   index?: string | string[];
   search_type?: 'query_then_fetch' | 'query_and_fetch' | 'dfs_query_then_fetch' | 'dfs_query_and_fetch';
   typed_keys?: boolean;
@@ -967,7 +1045,7 @@ export interface MsearchTemplate<T = any> extends Generic {
   body: T;
 }
 
-export interface Mtermvectors<T = any> extends Generic {
+export interface Mtermvectors<T = RequestBody> extends Generic {
   index?: string;
   ids?: string | string[];
   term_statistics?: boolean;
@@ -980,7 +1058,7 @@ export interface Mtermvectors<T = any> extends Generic {
   routing?: string;
   realtime?: boolean;
   version?: number;
-  version_type?: 'internal' | 'external' | 'external_gte' | 'force';
+  version_type?: 'internal' | 'external' | 'external_gte';
   body?: T;
 }
 
@@ -1001,15 +1079,16 @@ export interface NodesInfo extends Generic {
   timeout?: string;
 }
 
-export interface NodesReloadSecureSettings extends Generic {
+export interface NodesReloadSecureSettings<T = RequestBody> extends Generic {
   node_id?: string | string[];
   timeout?: string;
+  body?: T;
 }
 
 export interface NodesStats extends Generic {
+  node_id?: string | string[];
   metric?: string | string[];
   index_metric?: string | string[];
-  node_id?: string | string[];
   completion_fields?: string | string[];
   fielddata_fields?: string | string[];
   fields?: string | string[];
@@ -1021,15 +1100,15 @@ export interface NodesStats extends Generic {
 }
 
 export interface NodesUsage extends Generic {
-  metric?: string | string[];
   node_id?: string | string[];
+  metric?: string | string[];
   timeout?: string;
 }
 
 export interface Ping extends Generic {
 }
 
-export interface PutScript<T = any> extends Generic {
+export interface PutScript<T = RequestBody> extends Generic {
   id: string;
   context?: string;
   timeout?: string;
@@ -1037,22 +1116,23 @@ export interface PutScript<T = any> extends Generic {
   body: T;
 }
 
-export interface RankEval<T = any> extends Generic {
+export interface RankEval<T = RequestBody> extends Generic {
   index?: string | string[];
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
+  search_type?: 'query_then_fetch' | 'dfs_query_then_fetch';
   body: T;
 }
 
-export interface Reindex<T = any> extends Generic {
+export interface Reindex<T = RequestBody> extends Generic {
   refresh?: boolean;
   timeout?: string;
   wait_for_active_shards?: string;
   wait_for_completion?: boolean;
   requests_per_second?: number;
   scroll?: string;
-  slices?: number;
+  slices?: number|string;
   max_docs?: number;
   body: T;
 }
@@ -1062,23 +1142,23 @@ export interface ReindexRethrottle extends Generic {
   requests_per_second: number;
 }
 
-export interface RenderSearchTemplate<T = any> extends Generic {
+export interface RenderSearchTemplate<T = RequestBody> extends Generic {
   id?: string;
   body?: T;
 }
 
-export interface ScriptsPainlessExecute<T = any> extends Generic {
+export interface ScriptsPainlessExecute<T = RequestBody> extends Generic {
   body?: T;
 }
 
-export interface Scroll<T = any> extends Generic {
+export interface Scroll<T = RequestBody> extends Generic {
   scroll_id?: string;
   scroll?: string;
   rest_total_hits_as_int?: boolean;
   body?: T;
 }
 
-export interface Search<T = any> extends Generic {
+export interface Search<T = RequestBody> extends Generic {
   index?: string | string[];
   _source_exclude?: string | string[];
   _source_include?: string | string[];
@@ -1094,7 +1174,7 @@ export interface Search<T = any> extends Generic {
   ignore_unavailable?: boolean;
   ignore_throttled?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   lenient?: boolean;
   preference?: string;
   q?: string;
@@ -1114,7 +1194,7 @@ export interface Search<T = any> extends Generic {
   suggest_text?: string;
   timeout?: string;
   track_scores?: boolean;
-  track_total_hits?: boolean;
+  track_total_hits?: boolean | number;
   allow_partial_search_results?: boolean;
   typed_keys?: boolean;
   version?: boolean;
@@ -1134,15 +1214,15 @@ export interface SearchShards extends Generic {
   local?: boolean;
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
 }
 
-export interface SearchTemplate<T = any> extends Generic {
+export interface SearchTemplate<T = RequestBody> extends Generic {
   index?: string | string[];
   ignore_unavailable?: boolean;
   ignore_throttled?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   preference?: string;
   routing?: string | string[];
   scroll?: string;
@@ -1155,7 +1235,13 @@ export interface SearchTemplate<T = any> extends Generic {
   body: T;
 }
 
-export interface SnapshotCreate<T = any> extends Generic {
+export interface SnapshotCleanupRepository extends Generic {
+  repository: string;
+  master_timeout?: string;
+  timeout?: string;
+}
+
+export interface SnapshotCreate<T = RequestBody> extends Generic {
   repository: string;
   snapshot: string;
   master_timeout?: string;
@@ -1163,7 +1249,7 @@ export interface SnapshotCreate<T = any> extends Generic {
   body?: T;
 }
 
-export interface SnapshotCreateRepository<T = any> extends Generic {
+export interface SnapshotCreateRepository<T = RequestBody> extends Generic {
   repository: string;
   master_timeout?: string;
   timeout?: string;
@@ -1173,7 +1259,7 @@ export interface SnapshotCreateRepository<T = any> extends Generic {
 
 export interface SnapshotDelete extends Generic {
   repository: string;
-  snapshot: string;
+  snapshot: string | string[];
   master_timeout?: string;
 }
 
@@ -1197,7 +1283,7 @@ export interface SnapshotGetRepository extends Generic {
   local?: boolean;
 }
 
-export interface SnapshotRestore<T = any> extends Generic {
+export interface SnapshotRestore<T = RequestBody> extends Generic {
   repository: string;
   snapshot: string;
   master_timeout?: string;
@@ -1223,6 +1309,7 @@ export interface TasksCancel extends Generic {
   nodes?: string | string[];
   actions?: string | string[];
   parent_task_id?: string;
+  wait_for_completion?: boolean;
 }
 
 export interface TasksGet extends Generic {
@@ -1241,7 +1328,7 @@ export interface TasksList extends Generic {
   timeout?: string;
 }
 
-export interface Termvectors<T = any> extends Generic {
+export interface Termvectors<T = RequestBody> extends Generic {
   index: string;
   id?: string;
   term_statistics?: boolean;
@@ -1254,11 +1341,11 @@ export interface Termvectors<T = any> extends Generic {
   routing?: string;
   realtime?: boolean;
   version?: number;
-  version_type?: 'internal' | 'external' | 'external_gte' | 'force';
+  version_type?: 'internal' | 'external' | 'external_gte';
   body?: T;
 }
 
-export interface Update<T = any> extends Generic {
+export interface Update<T = RequestBody> extends Generic {
   id: string;
   index: string;
   type?: string;
@@ -1278,7 +1365,7 @@ export interface Update<T = any> extends Generic {
   body: T;
 }
 
-export interface UpdateByQuery<T = any> extends Generic {
+export interface UpdateByQuery<T = RequestBody> extends Generic {
   index: string | string[];
   _source_exclude?: string | string[];
   _source_include?: string | string[];
@@ -1290,7 +1377,7 @@ export interface UpdateByQuery<T = any> extends Generic {
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
   conflicts?: 'abort' | 'proceed';
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   lenient?: boolean;
   pipeline?: string;
   preference?: string;
@@ -1315,7 +1402,7 @@ export interface UpdateByQuery<T = any> extends Generic {
   scroll_size?: number;
   wait_for_completion?: boolean;
   requests_per_second?: number;
-  slices?: number;
+  slices?: number|string;
   body?: T;
 }
 
@@ -1324,25 +1411,162 @@ export interface UpdateByQueryRethrottle extends Generic {
   requests_per_second: number;
 }
 
+export interface AsyncSearchDelete extends Generic {
+  id: string;
+}
+
+export interface AsyncSearchGet extends Generic {
+  id: string;
+  wait_for_completion_timeout?: string;
+  keep_alive?: string;
+  typed_keys?: boolean;
+}
+
+export interface AsyncSearchSubmit<T = RequestBody> extends Generic {
+  index?: string | string[];
+  _source_exclude?: string | string[];
+  _source_include?: string | string[];
+  wait_for_completion_timeout?: string;
+  keep_on_completion?: boolean;
+  keep_alive?: string;
+  batched_reduce_size?: number;
+  request_cache?: boolean;
+  analyzer?: string;
+  analyze_wildcard?: boolean;
+  default_operator?: 'AND' | 'OR';
+  df?: string;
+  explain?: boolean;
+  stored_fields?: string | string[];
+  docvalue_fields?: string | string[];
+  from?: number;
+  ignore_unavailable?: boolean;
+  ignore_throttled?: boolean;
+  allow_no_indices?: boolean;
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
+  lenient?: boolean;
+  preference?: string;
+  q?: string;
+  routing?: string | string[];
+  search_type?: 'query_then_fetch' | 'dfs_query_then_fetch';
+  size?: number;
+  sort?: string | string[];
+  _source?: string | string[];
+  _source_excludes?: string | string[];
+  _source_includes?: string | string[];
+  terminate_after?: number;
+  stats?: string | string[];
+  suggest_field?: string;
+  suggest_mode?: 'missing' | 'popular' | 'always';
+  suggest_size?: number;
+  suggest_text?: string;
+  timeout?: string;
+  track_scores?: boolean;
+  track_total_hits?: boolean | number;
+  allow_partial_search_results?: boolean;
+  typed_keys?: boolean;
+  version?: boolean;
+  seq_no_primary_term?: boolean;
+  max_concurrent_shard_requests?: number;
+  body?: T;
+}
+
+export interface AutoscalingDeleteAutoscalingPolicy extends Generic {
+  name: string;
+}
+
+export interface AutoscalingGetAutoscalingDecision extends Generic {
+}
+
+export interface AutoscalingGetAutoscalingPolicy extends Generic {
+  name: string;
+}
+
+export interface AutoscalingPutAutoscalingPolicy<T = RequestBody> extends Generic {
+  name: string;
+  body: T;
+}
+
+export interface CatMlDataFrameAnalytics extends Generic {
+  id?: string;
+  allow_no_match?: boolean;
+  bytes?: 'b' | 'k' | 'kb' | 'm' | 'mb' | 'g' | 'gb' | 't' | 'tb' | 'p' | 'pb';
+  format?: string;
+  h?: string | string[];
+  help?: boolean;
+  s?: string | string[];
+  time?: 'd' | 'h' | 'm' | 's' | 'ms' | 'micros' | 'nanos';
+  v?: boolean;
+}
+
+export interface CatMlDatafeeds extends Generic {
+  datafeed_id?: string;
+  allow_no_datafeeds?: boolean;
+  format?: string;
+  h?: string | string[];
+  help?: boolean;
+  s?: string | string[];
+  time?: 'd' | 'h' | 'm' | 's' | 'ms' | 'micros' | 'nanos';
+  v?: boolean;
+}
+
+export interface CatMlJobs extends Generic {
+  job_id?: string;
+  allow_no_jobs?: boolean;
+  bytes?: 'b' | 'k' | 'kb' | 'm' | 'mb' | 'g' | 'gb' | 't' | 'tb' | 'p' | 'pb';
+  format?: string;
+  h?: string | string[];
+  help?: boolean;
+  s?: string | string[];
+  time?: 'd' | 'h' | 'm' | 's' | 'ms' | 'micros' | 'nanos';
+  v?: boolean;
+}
+
+export interface CatMlTrainedModels extends Generic {
+  model_id?: string;
+  allow_no_match?: boolean;
+  from?: number;
+  size?: number;
+  bytes?: 'b' | 'k' | 'kb' | 'm' | 'mb' | 'g' | 'gb' | 't' | 'tb' | 'p' | 'pb';
+  format?: string;
+  h?: string | string[];
+  help?: boolean;
+  s?: string | string[];
+  time?: 'd' | 'h' | 'm' | 's' | 'ms' | 'micros' | 'nanos';
+  v?: boolean;
+}
+
+export interface CatTransforms extends Generic {
+  transform_id?: string;
+  from?: number;
+  size?: number;
+  allow_no_match?: boolean;
+  format?: string;
+  h?: string | string[];
+  help?: boolean;
+  s?: string | string[];
+  time?: 'd' | 'h' | 'm' | 's' | 'ms' | 'micros' | 'nanos';
+  v?: boolean;
+}
+
 export interface CcrDeleteAutoFollowPattern extends Generic {
   name: string;
 }
 
-export interface CcrFollow<T = any> extends Generic {
+export interface CcrFollow<T = RequestBody> extends Generic {
   index: string;
   wait_for_active_shards?: string;
   body: T;
 }
 
 export interface CcrFollowInfo extends Generic {
-  index?: string | string[];
+  index: string | string[];
 }
 
 export interface CcrFollowStats extends Generic {
   index: string | string[];
 }
 
-export interface CcrForgetFollower<T = any> extends Generic {
+export interface CcrForgetFollower<T = RequestBody> extends Generic {
   index: string;
   body: T;
 }
@@ -1351,16 +1575,24 @@ export interface CcrGetAutoFollowPattern extends Generic {
   name?: string;
 }
 
+export interface CcrPauseAutoFollowPattern extends Generic {
+  name: string;
+}
+
 export interface CcrPauseFollow extends Generic {
   index: string;
 }
 
-export interface CcrPutAutoFollowPattern<T = any> extends Generic {
+export interface CcrPutAutoFollowPattern<T = RequestBody> extends Generic {
   name: string;
   body: T;
 }
 
-export interface CcrResumeFollow<T = any> extends Generic {
+export interface CcrResumeAutoFollowPattern extends Generic {
+  name: string;
+}
+
+export interface CcrResumeFollow<T = RequestBody> extends Generic {
   index: string;
   body?: T;
 }
@@ -1372,61 +1604,92 @@ export interface CcrUnfollow extends Generic {
   index: string;
 }
 
-export interface DataFrameDeleteDataFrameTransform extends Generic {
+export interface DataFrameTransformDeprecatedDeleteTransform extends Generic {
   transform_id: string;
   force?: boolean;
 }
 
-export interface DataFrameGetDataFrameTransform extends Generic {
+export interface DataFrameTransformDeprecatedGetTransform extends Generic {
   transform_id?: string;
   from?: number;
   size?: number;
   allow_no_match?: boolean;
 }
 
-export interface DataFrameGetDataFrameTransformStats extends Generic {
-  transform_id?: string;
+export interface DataFrameTransformDeprecatedGetTransformStats extends Generic {
+  transform_id: string;
   from?: number;
   size?: number;
   allow_no_match?: boolean;
 }
 
-export interface DataFramePreviewDataFrameTransform<T = any> extends Generic {
+export interface DataFrameTransformDeprecatedPreviewTransform<T = RequestBody> extends Generic {
   body: T;
 }
 
-export interface DataFramePutDataFrameTransform<T = any> extends Generic {
+export interface DataFrameTransformDeprecatedPutTransform<T = RequestBody> extends Generic {
   transform_id: string;
   defer_validation?: boolean;
   body: T;
 }
 
-export interface DataFrameStartDataFrameTransform extends Generic {
+export interface DataFrameTransformDeprecatedStartTransform extends Generic {
   transform_id: string;
   timeout?: string;
 }
 
-export interface DataFrameStopDataFrameTransform extends Generic {
+export interface DataFrameTransformDeprecatedStopTransform extends Generic {
   transform_id: string;
   wait_for_completion?: boolean;
   timeout?: string;
   allow_no_match?: boolean;
 }
 
-export interface GraphExplore<T = any> extends Generic {
-  index?: string | string[];
-  type?: string | string[];
+export interface DataFrameTransformDeprecatedUpdateTransform<T = RequestBody> extends Generic {
+  transform_id: string;
+  defer_validation?: boolean;
+  body: T;
+}
+
+export interface EnrichDeletePolicy extends Generic {
+  name: string;
+}
+
+export interface EnrichExecutePolicy extends Generic {
+  name: string;
+  wait_for_completion?: boolean;
+}
+
+export interface EnrichGetPolicy extends Generic {
+  name?: string | string[];
+}
+
+export interface EnrichPutPolicy<T = RequestBody> extends Generic {
+  name: string;
+  body: T;
+}
+
+export interface EnrichStats extends Generic {
+}
+
+export interface EqlSearch<T = RequestBody> extends Generic {
+  index: string;
+  body: T;
+}
+
+export interface GraphExplore<T = RequestBody> extends Generic {
+  index: string | string[];
   routing?: string;
   timeout?: string;
   body?: T;
 }
 
 export interface IlmDeleteLifecycle extends Generic {
-  policy?: string;
+  policy: string;
 }
 
 export interface IlmExplainLifecycle extends Generic {
-  index?: string;
+  index: string;
   only_managed?: boolean;
   only_errors?: boolean;
 }
@@ -1438,22 +1701,22 @@ export interface IlmGetLifecycle extends Generic {
 export interface IlmGetStatus extends Generic {
 }
 
-export interface IlmMoveToStep<T = any> extends Generic {
-  index?: string;
+export interface IlmMoveToStep<T = RequestBody> extends Generic {
+  index: string;
   body?: T;
 }
 
-export interface IlmPutLifecycle<T = any> extends Generic {
-  policy?: string;
+export interface IlmPutLifecycle<T = RequestBody> extends Generic {
+  policy: string;
   body?: T;
 }
 
 export interface IlmRemovePolicy extends Generic {
-  index?: string;
+  index: string;
 }
 
 export interface IlmRetry extends Generic {
-  index?: string;
+  index: string;
 }
 
 export interface IlmStart extends Generic {
@@ -1468,15 +1731,15 @@ export interface IndicesFreeze extends Generic {
   master_timeout?: string;
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   wait_for_active_shards?: string;
 }
 
 export interface IndicesReloadSearchAnalyzers extends Generic {
-  index?: string | string[];
+  index: string | string[];
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
 }
 
 export interface IndicesUnfreeze extends Generic {
@@ -1485,7 +1748,7 @@ export interface IndicesUnfreeze extends Generic {
   master_timeout?: string;
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
-  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   wait_for_active_shards?: string;
 }
 
@@ -1494,6 +1757,7 @@ export interface LicenseDelete extends Generic {
 
 export interface LicenseGet extends Generic {
   local?: boolean;
+  accept_enterprise?: boolean;
 }
 
 export interface LicenseGetBasicStatus extends Generic {
@@ -1502,7 +1766,7 @@ export interface LicenseGetBasicStatus extends Generic {
 export interface LicenseGetTrialStatus extends Generic {
 }
 
-export interface LicensePost<T = any> extends Generic {
+export interface LicensePost<T = RequestBody> extends Generic {
   acknowledge?: boolean;
   body?: T;
 }
@@ -1520,7 +1784,7 @@ export interface MigrationDeprecations extends Generic {
   index?: string;
 }
 
-export interface MlCloseJob<T = any> extends Generic {
+export interface MlCloseJob<T = RequestBody> extends Generic {
   job_id: string;
   allow_no_jobs?: boolean;
   force?: boolean;
@@ -1544,6 +1808,7 @@ export interface MlDeleteCalendarJob extends Generic {
 
 export interface MlDeleteDataFrameAnalytics extends Generic {
   id: string;
+  force?: boolean;
 }
 
 export interface MlDeleteDatafeed extends Generic {
@@ -1551,7 +1816,8 @@ export interface MlDeleteDatafeed extends Generic {
   force?: boolean;
 }
 
-export interface MlDeleteExpiredData extends Generic {
+export interface MlDeleteExpiredData<T = RequestBody> extends Generic {
+  body?: T;
 }
 
 export interface MlDeleteFilter extends Generic {
@@ -1576,11 +1842,24 @@ export interface MlDeleteModelSnapshot extends Generic {
   snapshot_id: string;
 }
 
-export interface MlEvaluateDataFrame<T = any> extends Generic {
+export interface MlDeleteTrainedModel extends Generic {
+  model_id: string;
+}
+
+export interface MlEstimateModelMemory<T = RequestBody> extends Generic {
   body: T;
 }
 
-export interface MlFindFileStructure<T = any> extends Generic {
+export interface MlEvaluateDataFrame<T = RequestBody> extends Generic {
+  body: T;
+}
+
+export interface MlExplainDataFrameAnalytics<T = RequestBody> extends Generic {
+  id?: string;
+  body?: T;
+}
+
+export interface MlFindFileStructure<T = RequestNDBody> extends Generic {
   lines_to_sample?: number;
   line_merge_size_limit?: number;
   timeout?: string;
@@ -1598,7 +1877,7 @@ export interface MlFindFileStructure<T = any> extends Generic {
   body: T;
 }
 
-export interface MlFlushJob<T = any> extends Generic {
+export interface MlFlushJob<T = RequestBody> extends Generic {
   job_id: string;
   calc_interim?: boolean;
   start?: string;
@@ -1612,9 +1891,10 @@ export interface MlForecast extends Generic {
   job_id: string;
   duration?: string;
   expires_in?: string;
+  max_model_memory?: string;
 }
 
-export interface MlGetBuckets<T = any> extends Generic {
+export interface MlGetBuckets<T = RequestBody> extends Generic {
   job_id: string;
   timestamp?: string;
   expand?: boolean;
@@ -1638,14 +1918,14 @@ export interface MlGetCalendarEvents extends Generic {
   size?: number;
 }
 
-export interface MlGetCalendars<T = any> extends Generic {
+export interface MlGetCalendars<T = RequestBody> extends Generic {
   calendar_id?: string;
   from?: number;
   size?: number;
   body?: T;
 }
 
-export interface MlGetCategories<T = any> extends Generic {
+export interface MlGetCategories<T = RequestBody> extends Generic {
   job_id: string;
   category_id?: number;
   from?: number;
@@ -1683,7 +1963,7 @@ export interface MlGetFilters extends Generic {
   size?: number;
 }
 
-export interface MlGetInfluencers<T = any> extends Generic {
+export interface MlGetInfluencers<T = RequestBody> extends Generic {
   job_id: string;
   exclude_interim?: boolean;
   from?: number;
@@ -1706,7 +1986,7 @@ export interface MlGetJobs extends Generic {
   allow_no_jobs?: boolean;
 }
 
-export interface MlGetModelSnapshots<T = any> extends Generic {
+export interface MlGetModelSnapshots<T = RequestBody> extends Generic {
   job_id: string;
   snapshot_id?: string;
   from?: number;
@@ -1718,7 +1998,7 @@ export interface MlGetModelSnapshots<T = any> extends Generic {
   body?: T;
 }
 
-export interface MlGetOverallBuckets<T = any> extends Generic {
+export interface MlGetOverallBuckets<T = RequestBody> extends Generic {
   job_id: string;
   top_n?: number;
   bucket_span?: string;
@@ -1730,7 +2010,7 @@ export interface MlGetOverallBuckets<T = any> extends Generic {
   body?: T;
 }
 
-export interface MlGetRecords<T = any> extends Generic {
+export interface MlGetRecords<T = RequestBody> extends Generic {
   job_id: string;
   exclude_interim?: boolean;
   from?: number;
@@ -1743,21 +2023,37 @@ export interface MlGetRecords<T = any> extends Generic {
   body?: T;
 }
 
+export interface MlGetTrainedModels extends Generic {
+  model_id?: string;
+  allow_no_match?: boolean;
+  include_model_definition?: boolean;
+  decompress_definition?: boolean;
+  from?: number;
+  size?: number;
+  tags?: string | string[];
+  for_export?: boolean;
+}
+
+export interface MlGetTrainedModelsStats extends Generic {
+  model_id?: string;
+  allow_no_match?: boolean;
+  from?: number;
+  size?: number;
+}
+
 export interface MlInfo extends Generic {
 }
 
 export interface MlOpenJob extends Generic {
   job_id: string;
-  ignore_downtime?: boolean;
-  timeout?: string;
 }
 
-export interface MlPostCalendarEvents<T = any> extends Generic {
+export interface MlPostCalendarEvents<T = RequestBody> extends Generic {
   calendar_id: string;
   body: T;
 }
 
-export interface MlPostData<T = any> extends Generic {
+export interface MlPostData<T = RequestBody> extends Generic {
   job_id: string;
   reset_start?: string;
   reset_end?: string;
@@ -1768,7 +2064,7 @@ export interface MlPreviewDatafeed extends Generic {
   datafeed_id: string;
 }
 
-export interface MlPutCalendar<T = any> extends Generic {
+export interface MlPutCalendar<T = RequestBody> extends Generic {
   calendar_id: string;
   body?: T;
 }
@@ -1778,27 +2074,36 @@ export interface MlPutCalendarJob extends Generic {
   job_id: string;
 }
 
-export interface MlPutDataFrameAnalytics<T = any> extends Generic {
+export interface MlPutDataFrameAnalytics<T = RequestBody> extends Generic {
   id: string;
   body: T;
 }
 
-export interface MlPutDatafeed<T = any> extends Generic {
+export interface MlPutDatafeed<T = RequestBody> extends Generic {
   datafeed_id: string;
+  ignore_unavailable?: boolean;
+  allow_no_indices?: boolean;
+  ignore_throttled?: boolean;
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   body: T;
 }
 
-export interface MlPutFilter<T = any> extends Generic {
+export interface MlPutFilter<T = RequestBody> extends Generic {
   filter_id: string;
   body: T;
 }
 
-export interface MlPutJob<T = any> extends Generic {
+export interface MlPutJob<T = RequestBody> extends Generic {
   job_id: string;
   body: T;
 }
 
-export interface MlRevertModelSnapshot<T = any> extends Generic {
+export interface MlPutTrainedModel<T = RequestBody> extends Generic {
+  model_id: string;
+  body: T;
+}
+
+export interface MlRevertModelSnapshot<T = RequestBody> extends Generic {
   job_id: string;
   snapshot_id: string;
   delete_intervening_results?: boolean;
@@ -1810,13 +2115,13 @@ export interface MlSetUpgradeMode extends Generic {
   timeout?: string;
 }
 
-export interface MlStartDataFrameAnalytics<T = any> extends Generic {
+export interface MlStartDataFrameAnalytics<T = RequestBody> extends Generic {
   id: string;
   timeout?: string;
   body?: T;
 }
 
-export interface MlStartDatafeed<T = any> extends Generic {
+export interface MlStartDatafeed<T = RequestBody> extends Generic {
   datafeed_id: string;
   start?: string;
   end?: string;
@@ -1824,7 +2129,7 @@ export interface MlStartDatafeed<T = any> extends Generic {
   body?: T;
 }
 
-export interface MlStopDataFrameAnalytics<T = any> extends Generic {
+export interface MlStopDataFrameAnalytics<T = RequestBody> extends Generic {
   id: string;
   allow_no_match?: boolean;
   force?: boolean;
@@ -1839,36 +2144,40 @@ export interface MlStopDatafeed extends Generic {
   timeout?: string;
 }
 
-export interface MlUpdateDatafeed<T = any> extends Generic {
+export interface MlUpdateDatafeed<T = RequestBody> extends Generic {
   datafeed_id: string;
+  ignore_unavailable?: boolean;
+  allow_no_indices?: boolean;
+  ignore_throttled?: boolean;
+  expand_wildcards?: 'open' | 'closed' | 'hidden' | 'none' | 'all';
   body: T;
 }
 
-export interface MlUpdateFilter<T = any> extends Generic {
+export interface MlUpdateFilter<T = RequestBody> extends Generic {
   filter_id: string;
   body: T;
 }
 
-export interface MlUpdateJob<T = any> extends Generic {
+export interface MlUpdateJob<T = RequestBody> extends Generic {
   job_id: string;
   body: T;
 }
 
-export interface MlUpdateModelSnapshot<T = any> extends Generic {
+export interface MlUpdateModelSnapshot<T = RequestBody> extends Generic {
   job_id: string;
   snapshot_id: string;
   body: T;
 }
 
-export interface MlValidate<T = any> extends Generic {
+export interface MlValidate<T = RequestBody> extends Generic {
   body: T;
 }
 
-export interface MlValidateDetector<T = any> extends Generic {
+export interface MlValidateDetector<T = RequestBody> extends Generic {
   body: T;
 }
 
-export interface MonitoringBulk<T = any> extends Generic {
+export interface MonitoringBulk<T = RequestNDBody> extends Generic {
   type?: string;
   system_id?: string;
   system_api_version?: string;
@@ -1892,12 +2201,12 @@ export interface RollupGetRollupIndexCaps extends Generic {
   index: string;
 }
 
-export interface RollupPutJob<T = any> extends Generic {
+export interface RollupPutJob<T = RequestBody> extends Generic {
   id: string;
   body: T;
 }
 
-export interface RollupRollupSearch<T = any> extends Generic {
+export interface RollupRollupSearch<T = RequestBody> extends Generic {
   index: string | string[];
   type?: string;
   typed_keys?: boolean;
@@ -1915,10 +2224,33 @@ export interface RollupStopJob extends Generic {
   timeout?: string;
 }
 
+export interface SearchableSnapshotsClearCache extends Generic {
+  index?: string | string[];
+  ignore_unavailable?: boolean;
+  allow_no_indices?: boolean;
+  expand_wildcards?: 'open' | 'closed' | 'none' | 'all';
+}
+
+export interface SearchableSnapshotsMount<T = RequestBody> extends Generic {
+  repository: string;
+  snapshot: string;
+  master_timeout?: string;
+  wait_for_completion?: boolean;
+  body: T;
+}
+
+export interface SearchableSnapshotsRepositoryStats extends Generic {
+  repository: string;
+}
+
+export interface SearchableSnapshotsStats extends Generic {
+  index?: string | string[];
+}
+
 export interface SecurityAuthenticate extends Generic {
 }
 
-export interface SecurityChangePassword<T = any> extends Generic {
+export interface SecurityChangePassword<T = RequestBody> extends Generic {
   username?: string;
   refresh?: 'true' | 'false' | 'wait_for';
   body: T;
@@ -1933,7 +2265,7 @@ export interface SecurityClearCachedRoles extends Generic {
   name: string | string[];
 }
 
-export interface SecurityCreateApiKey<T = any> extends Generic {
+export interface SecurityCreateApiKey<T = RequestBody> extends Generic {
   refresh?: 'true' | 'false' | 'wait_for';
   body: T;
 }
@@ -1974,6 +2306,7 @@ export interface SecurityGetApiKey extends Generic {
   name?: string;
   username?: string;
   realm_name?: string;
+  owner?: boolean;
 }
 
 export interface SecurityGetBuiltinPrivileges extends Generic {
@@ -1985,14 +2318,14 @@ export interface SecurityGetPrivileges extends Generic {
 }
 
 export interface SecurityGetRole extends Generic {
-  name?: string;
+  name?: string | string[];
 }
 
 export interface SecurityGetRoleMapping extends Generic {
-  name?: string;
+  name?: string | string[];
 }
 
-export interface SecurityGetToken<T = any> extends Generic {
+export interface SecurityGetToken<T = RequestBody> extends Generic {
   body: T;
 }
 
@@ -2003,73 +2336,137 @@ export interface SecurityGetUser extends Generic {
 export interface SecurityGetUserPrivileges extends Generic {
 }
 
-export interface SecurityHasPrivileges<T = any> extends Generic {
+export interface SecurityHasPrivileges<T = RequestBody> extends Generic {
   user?: string;
   body: T;
 }
 
-export interface SecurityInvalidateApiKey<T = any> extends Generic {
+export interface SecurityInvalidateApiKey<T = RequestBody> extends Generic {
   body: T;
 }
 
-export interface SecurityInvalidateToken<T = any> extends Generic {
+export interface SecurityInvalidateToken<T = RequestBody> extends Generic {
   body: T;
 }
 
-export interface SecurityPutPrivileges<T = any> extends Generic {
+export interface SecurityPutPrivileges<T = RequestBody> extends Generic {
   refresh?: 'true' | 'false' | 'wait_for';
   body: T;
 }
 
-export interface SecurityPutRole<T = any> extends Generic {
+export interface SecurityPutRole<T = RequestBody> extends Generic {
   name: string;
   refresh?: 'true' | 'false' | 'wait_for';
   body: T;
 }
 
-export interface SecurityPutRoleMapping<T = any> extends Generic {
+export interface SecurityPutRoleMapping<T = RequestBody> extends Generic {
   name: string;
   refresh?: 'true' | 'false' | 'wait_for';
   body: T;
 }
 
-export interface SecurityPutUser<T = any> extends Generic {
+export interface SecurityPutUser<T = RequestBody> extends Generic {
   username: string;
   refresh?: 'true' | 'false' | 'wait_for';
   body: T;
 }
 
 export interface SlmDeleteLifecycle extends Generic {
-  policy_id?: string;
+  policy_id: string;
 }
 
 export interface SlmExecuteLifecycle extends Generic {
-  policy_id?: string;
+  policy_id: string;
+}
+
+export interface SlmExecuteRetention extends Generic {
 }
 
 export interface SlmGetLifecycle extends Generic {
-  policy_id?: string;
+  policy_id?: string | string[];
 }
 
-export interface SlmPutLifecycle<T = any> extends Generic {
-  policy_id?: string;
+export interface SlmGetStats extends Generic {
+}
+
+export interface SlmGetStatus extends Generic {
+}
+
+export interface SlmPutLifecycle<T = RequestBody> extends Generic {
+  policy_id: string;
   body?: T;
 }
 
-export interface SqlClearCursor<T = any> extends Generic {
+export interface SlmStart extends Generic {
+}
+
+export interface SlmStop extends Generic {
+}
+
+export interface SqlClearCursor<T = RequestBody> extends Generic {
   body: T;
 }
 
-export interface SqlQuery<T = any> extends Generic {
+export interface SqlQuery<T = RequestBody> extends Generic {
   format?: string;
   body: T;
 }
 
-export interface SqlTranslate<T = any> extends Generic {
+export interface SqlTranslate<T = RequestBody> extends Generic {
   body: T;
 }
 
 export interface SslCertificates extends Generic {
+}
+
+export interface TransformDeleteTransform extends Generic {
+  transform_id: string;
+  force?: boolean;
+}
+
+export interface TransformGetTransform extends Generic {
+  transform_id?: string;
+  from?: number;
+  size?: number;
+  allow_no_match?: boolean;
+}
+
+export interface TransformGetTransformStats extends Generic {
+  transform_id: string;
+  from?: number;
+  size?: number;
+  allow_no_match?: boolean;
+}
+
+export interface TransformPreviewTransform<T = RequestBody> extends Generic {
+  body: T;
+}
+
+export interface TransformPutTransform<T = RequestBody> extends Generic {
+  transform_id: string;
+  defer_validation?: boolean;
+  body: T;
+}
+
+export interface TransformStartTransform extends Generic {
+  transform_id: string;
+  timeout?: string;
+}
+
+export interface TransformStopTransform extends Generic {
+  transform_id: string;
+  force?: boolean;
+  wait_for_completion?: boolean;
+  timeout?: string;
+  allow_no_match?: boolean;
+  wait_for_checkpoint?: boolean;
+}
+
+export interface TransformUpdateTransform<T = RequestBody> extends Generic {
+  transform_id: string;
+  defer_validation?: boolean;
+  body: T;
 }
 
 export interface WatcherAckWatch extends Generic {
@@ -2089,7 +2486,7 @@ export interface WatcherDeleteWatch extends Generic {
   id: string;
 }
 
-export interface WatcherExecuteWatch<T = any> extends Generic {
+export interface WatcherExecuteWatch<T = RequestBody> extends Generic {
   id?: string;
   debug?: boolean;
   body?: T;
@@ -2099,7 +2496,7 @@ export interface WatcherGetWatch extends Generic {
   id: string;
 }
 
-export interface WatcherPutWatch<T = any> extends Generic {
+export interface WatcherPutWatch<T = RequestBody> extends Generic {
   id: string;
   active?: boolean;
   version?: number;

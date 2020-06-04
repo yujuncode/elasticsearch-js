@@ -10,13 +10,6 @@
 function buildMlUpdateModelSnapshot (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [ml.update_model_snapshot](http://www.elastic.co/guide/en/elasticsearch/reference/current/ml-update-snapshot.html) request
-   *
-   * @param {string} job_id - The ID of the job to fetch
-   * @param {string} snapshot_id - The ID of the snapshot to update
-   * @param {object} body - The model snapshot properties to update
-   */
 
   const acceptedQuerystring = [
 
@@ -26,6 +19,11 @@ function buildMlUpdateModelSnapshot (opts) {
 
   }
 
+  /**
+   * Perform a ml.update_model_snapshot request
+   * Updates certain properties of a snapshot.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-update-snapshot.html
+   */
   return function mlUpdateModelSnapshot (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -68,10 +66,6 @@ function buildMlUpdateModelSnapshot (opts) {
     var { method, body, jobId, job_id, snapshotId, snapshot_id, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = 'POST'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -79,6 +73,7 @@ function buildMlUpdateModelSnapshot (opts) {
 
     var path = ''
 
+    if (method == null) method = 'POST'
     path = '/' + '_ml' + '/' + 'anomaly_detectors' + '/' + encodeURIComponent(job_id || jobId) + '/' + 'model_snapshots' + '/' + encodeURIComponent(snapshot_id || snapshotId) + '/' + '_update'
 
     // build request object

@@ -10,11 +10,6 @@
 function buildSqlClearCursor (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [sql.clear_cursor](Clear SQL cursor) request
-   *
-   * @param {object} body - Specify the cursor value in the `cursor` element to clean the cursor.
-   */
 
   const acceptedQuerystring = [
 
@@ -24,6 +19,11 @@ function buildSqlClearCursor (opts) {
 
   }
 
+  /**
+   * Perform a sql.clear_cursor request
+   * Clears the SQL cursor
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/sql-pagination.html
+   */
   return function sqlClearCursor (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -52,10 +52,6 @@ function buildSqlClearCursor (opts) {
     var { method, body, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = 'POST'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -63,6 +59,7 @@ function buildSqlClearCursor (opts) {
 
     var path = ''
 
+    if (method == null) method = 'POST'
     path = '/' + '_sql' + '/' + 'close'
 
     // build request object

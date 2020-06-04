@@ -10,12 +10,6 @@
 function buildMlUpdateFilter (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [ml.update_filter](undefined) request
-   *
-   * @param {string} filter_id - The ID of the filter to update
-   * @param {object} body - The filter update
-   */
 
   const acceptedQuerystring = [
 
@@ -25,6 +19,11 @@ function buildMlUpdateFilter (opts) {
 
   }
 
+  /**
+   * Perform a ml.update_filter request
+   * Updates the description of a filter, adds items, or removes items.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-update-filter.html
+   */
   return function mlUpdateFilter (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -57,10 +56,6 @@ function buildMlUpdateFilter (opts) {
     var { method, body, filterId, filter_id, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = 'POST'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -68,6 +63,7 @@ function buildMlUpdateFilter (opts) {
 
     var path = ''
 
+    if (method == null) method = 'POST'
     path = '/' + '_ml' + '/' + 'filters' + '/' + encodeURIComponent(filter_id || filterId) + '/' + '_update'
 
     // build request object

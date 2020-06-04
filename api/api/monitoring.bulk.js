@@ -10,15 +10,6 @@
 function buildMonitoringBulk (opts) {
   // eslint-disable-next-line no-unused-vars
   const { makeRequest, ConfigurationError, handleError, snakeCaseKeys } = opts
-  /**
-   * Perform a [monitoring.bulk](https://www.elastic.co/guide/en/elasticsearch/reference/master/es-monitoring.html) request
-   *
-   * @param {string} type - Default document type for items which don't provide one
-   * @param {string} system_id - Identifier of the monitored system
-   * @param {string} system_api_version - API Version of the monitored system
-   * @param {string} interval - Collection interval (e.g., '10s' or '10000ms') of the payload
-   * @param {object} body - The operation definition and data (action-data pairs), separated by newlines
-   */
 
   const acceptedQuerystring = [
     'system_id',
@@ -32,6 +23,11 @@ function buildMonitoringBulk (opts) {
 
   }
 
+  /**
+   * Perform a monitoring.bulk request
+   * Used by the monitoring features to send monitoring data.
+   * https://www.elastic.co/guide/en/elasticsearch/reference/master/monitor-elasticsearch-cluster.html
+   */
   return function monitoringBulk (params, options, callback) {
     options = options || {}
     if (typeof options === 'function') {
@@ -60,10 +56,6 @@ function buildMonitoringBulk (opts) {
     var { method, body, type, ...querystring } = params
     querystring = snakeCaseKeys(acceptedQuerystring, snakeCase, querystring, warnings)
 
-    if (method == null) {
-      method = 'POST'
-    }
-
     var ignore = options.ignore
     if (typeof ignore === 'number') {
       options.ignore = [ignore]
@@ -72,8 +64,10 @@ function buildMonitoringBulk (opts) {
     var path = ''
 
     if ((type) != null) {
+      if (method == null) method = 'POST'
       path = '/' + '_monitoring' + '/' + encodeURIComponent(type) + '/' + 'bulk'
     } else {
+      if (method == null) method = 'POST'
       path = '/' + '_monitoring' + '/' + 'bulk'
     }
 
