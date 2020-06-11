@@ -94,6 +94,7 @@ class Client extends EventEmitter {
     this.serializer = new options.Serializer()
     this.connectionPool = new options.ConnectionPool({
       pingTimeout: options.pingTimeout,
+      requestTimeout: options.requestTimeout,
       resurrectStrategy: options.resurrectStrategy,
       ssl: options.ssl,
       agent: options.agent,
